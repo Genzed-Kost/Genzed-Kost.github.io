@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Genzed Kost — Hunian modern untuk generasi yang bergerak. Nyaman, stylish, dan terjangkau di lokasi strategis.">
+<meta name="theme-color" content="#0A0A0A">
+<title>Genzed Kost — Suasana Lebih Muda, Mood Abiezz</title>
+
+<!-- Performance: Preconnect -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+
+<style>
+/* ===== TOKENS ===== */
+:root {
+  --bg:          #0A0A0A;
+  --surface:     #141414;
+  --surface2:    #1C1C1C;
+  --border:      #2A2A2A;
+  --border-h:    rgba(200,240,75,.28);
+  --text:        #F2EDE6;
+  --muted:       #888880;
+  --accent:      #C8F04B;
+  --accent-dark: #9BBD30;
+  --wa:          #25D366;
+  --r:           16px;
+  --r-xl:        24px;
+  --ease-out:    cubic-bezier(.22,1,.36,1);
+  --ease-in-out: cubic-bezier(.65,0,.35,1);
+}
+
+/* ===== RESET ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  line-height: 1.65;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { display: block; max-width: 100%; }
+a { color: inherit; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 4px; }
+
+/* ===== NAVBAR ===== */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  padding: 16px 5vw;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(10,10,10,.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  transition: background .3s var(--ease-out), box-shadow .3s;
+  will-change: background;
+}
+nav.scrolled { background: rgba(10,10,10,.97); box-shadow: 0 1px 0 var(--border); }
+.nav-logo {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  letter-spacing: -.035em; color: var(--text); text-decoration: none;
+}
+.nav-logo span { color: var(--accent); }
+.nav-links { display: flex; gap: 28px; list-style: none; }
+.nav-links a {
+  color: var(--muted); text-decoration: none;
+  font-size: .875rem; font-weight: 500;
+  transition: color .2s;
+  padding: 4px 0;
+  position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+  height: 1px; background: var(--accent);
+  transform: scaleX(0); transform-origin: left;
+  transition: transform .25s var(--ease-out);
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a:hover::after { transform: scaleX(1); }
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.btn-wa-nav {
+  background: var(--wa); color: #fff; border: none;
+  padding: 9px 18px; border-radius: 100px;
+  font-weight: 600; font-size: .82rem; cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: transform .15s, box-shadow .2s;
+}
+.btn-wa-nav:hover { transform: scale(1.04); box-shadow: 0 6px 22px rgba(37,211,102,.35); }
+.hamburger {
+  display: none; flex-direction: column; gap: 5px;
+  cursor: pointer; background: none; border: none; padding: 6px;
+}
+.hamburger span {
+  display: block; width: 22px; height: 2px;
+  background: var(--text); border-radius: 2px;
+  transition: transform .3s var(--ease-out), opacity .2s;
+}
+.hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ===== MOBILE MENU ===== */
+.mobile-menu {
+  display: flex; position: fixed; inset: 0; z-index: 99;
+  background: rgba(10,10,10,.97);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s var(--ease-out);
+}
+.mobile-menu.open { opacity: 1; pointer-events: all; }
+.mobile-menu a {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(1.6rem, 6vw, 2.2rem);
+  color: var(--text); text-decoration: none;
+  transition: color .2s;
+  opacity: 0; transform: translateY(16px);
+  transition: color .2s, opacity .3s, transform .3s;
+}
+.mobile-menu.open a { opacity: 1; transform: translateY(0); }
+.mobile-menu.open a:nth-child(2) { transition-delay: .05s; }
+.mobile-menu.open a:nth-child(3) { transition-delay: .1s; }
+.mobile-menu.open a:nth-child(4) { transition-delay: .15s; }
+.mobile-menu.open a:nth-child(5) { transition-delay: .2s; }
+.mobile-menu.open a:nth-child(6) { transition-delay: .25s; }
+.mobile-menu.open a:nth-child(7) { transition-delay: .3s; }
+.mobile-menu a:hover { color: var(--accent); }
+
+/* ===== HERO ===== */
+#hero {
+  min-height: 100svh; padding: clamp(100px,14vw,140px) 5vw clamp(56px,8vw,80px);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;
+  position: relative; overflow: hidden;
+}
+.hero-glow {
+  position: absolute; pointer-events: none;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(200,240,75,.06) 0%, transparent 68%);
+  top: -120px; right: -120px;
+}
+.hero-glow-2 {
+  position: absolute; pointer-events: none;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(37,211,102,.04) 0%, transparent 70%);
+  bottom: 0; left: -60px;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(200,240,75,.1); border: 1px solid rgba(200,240,75,.22);
+  border-radius: 100px; padding: 6px 14px;
+  font-size: .72rem; font-weight: 600; color: var(--accent);
+  margin-bottom: 20px; letter-spacing: .07em; text-transform: uppercase;
+}
+.hero-badge-dot {
+  width: 7px; height: 7px; background: var(--accent);
+  border-radius: 50%; animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(1.5)} }
+
+.hero-title {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(2.5rem, 4.8vw, 5.2rem);
+  line-height: 1.0; letter-spacing: -.045em; margin-bottom: 18px;
+}
+.hero-title .line-accent { color: var(--accent); }
+.hero-tagline { font-size: 1.05rem; color: var(--muted); font-style: italic; margin-bottom: 10px; }
+.hero-desc {
+  color: var(--muted); font-size: .97rem;
+  max-width: 460px; line-height: 1.75; margin-bottom: 32px;
+}
+.hero-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hero-stats {
+  display: flex; gap: clamp(20px, 4vw, 40px); margin-top: 44px;
+  padding-top: 32px; border-top: 1px solid var(--border);
+}
+.stat-item .num {
+  font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 800;
+  color: var(--text); line-height: 1; margin-bottom: 4px; letter-spacing: -.04em;
+}
+.stat-item .num span { color: var(--accent); }
+.stat-item .label { font-size: .75rem; color: var(--muted); letter-spacing: .01em; }
+
+/* Hero Visual */
+.hero-visual { position: relative; }
+.floating-tag {
+  position: absolute; background: rgba(20,20,20,.9);
+  border: 1px solid var(--border); border-radius: var(--r); padding: 11px 14px;
+  display: flex; align-items: center; gap: 10px;
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  z-index: 2;
+}
+.floating-tag.tag-1 {
+  top: -14px; right: -14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.5);
+  animation: float1 4s ease-in-out infinite;
+}
+.floating-tag.tag-2 {
+  bottom: 72px; left: -18px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.5);
+  animation: float2 5s ease-in-out infinite;
+}
+@keyframes float1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes float2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
+.tag-icon { font-size: 1.2rem; }
+.tag-label { font-size: .68rem; color: var(--muted); margin-bottom: 2px; }
+.tag-value { font-size: .82rem; font-weight: 600; }
+.room-card-main {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-xl); overflow: hidden;
+  transition: border-color .3s, transform .4s var(--ease-out);
+}
+.room-card-main:hover { border-color: var(--border-h); transform: translateY(-4px); }
+.room-img-placeholder {
+  width: 100%; aspect-ratio: 4/3;
+  background: linear-gradient(135deg, #1A1A1A 0%, #252525 50%, #1A1A1A 100%);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.room-img-placeholder::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(200,240,75,.05) 0%, transparent 60%);
+}
+.room-svg { width: 85%; max-width: 360px; }
+.room-card-info {
+  padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+  border-top: 1px solid var(--border);
+}
+.room-card-info .room-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .9rem; }
+.room-card-info .room-price { font-size: .85rem; color: var(--accent); font-weight: 600; }
+
+/* ===== BUTTONS ===== */
+.btn-primary, .btn-wa, .btn-ghost {
+  border: none; border-radius: 100px;
+  font-weight: 600; font-size: .92rem; cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 26px;
+  transition: transform .15s var(--ease-out), box-shadow .2s;
+  white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: #0A0A0A; }
+.btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(200,240,75,.3); }
+.btn-wa { background: var(--wa); color: #fff; }
+.btn-wa:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(37,211,102,.38); }
+.btn-ghost { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--accent); background: rgba(200,240,75,.05); }
+
+/* ===== MARQUEE ===== */
+.marquee-wrap {
+  overflow: hidden; background: var(--accent);
+  padding: 13px 0; white-space: nowrap; user-select: none;
+}
+.marquee-track {
+  display: inline-flex;
+  animation: marquee 22s linear infinite;
+  will-change: transform;
+}
+.marquee-track:hover { animation-play-state: paused; }
+.marquee-track span {
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: .8rem; color: #0A0A0A;
+  letter-spacing: .06em; text-transform: uppercase; padding: 0 32px;
+}
+.marquee-track span::before { content: '✦  '; }
+@keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+/* ===== SECTION HELPERS ===== */
+section { padding: clamp(64px, 10vw, 96px) 5vw; }
+.section-eyebrow {
+  font-size: .72rem; font-weight: 600; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+}
+.section-title {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+  letter-spacing: -.04em; line-height: 1.08; margin-bottom: 12px;
+}
+.section-sub { color: var(--muted); font-size: .97rem; max-width: 480px; line-height: 1.7; }
+.section-header {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-bottom: clamp(36px, 5vw, 52px); flex-wrap: wrap; gap: 20px;
+}
+
+/* ===== FITUR ===== */
+#fitur { background: var(--surface); }
+.fitur-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 18px;
+  margin-top: clamp(32px,5vw,52px);
+}
+.fitur-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden;
+  transition: border-color .3s, transform .3s var(--ease-out), box-shadow .3s;
+  will-change: transform;
+}
+.fitur-card:hover {
+  border-color: var(--border-h); transform: translateY(-6px);
+  box-shadow: 0 20px 48px rgba(200,240,75,.07);
+}
+.fitur-card-img {
+  width: 100%; aspect-ratio: 4/3;
+  background: linear-gradient(135deg, #1C1C1C, #232323);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3.2rem; position: relative; overflow: hidden;
+  transition: background .3s;
+}
+.fitur-card:hover .fitur-card-img { background: linear-gradient(135deg, #1C1C1C, rgba(200,240,75,.06)); }
+.fitur-card-img::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(180deg, transparent 50%, rgba(10,10,10,.35) 100%);
+}
+.fitur-card-body { padding: 16px 20px 20px; }
+.fitur-card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .95rem; margin-bottom: 5px; }
+.fitur-card-desc { font-size: .82rem; color: var(--muted); line-height: 1.55; }
+
+/* ===== UPGRADE ===== */
+#upgrade { background: var(--bg); position: relative; overflow: hidden; }
+#upgrade::before {
+  content: ''; position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 800px; pointer-events: none;
+  background: radial-gradient(circle, rgba(200,240,75,.04) 0%, transparent 65%);
+}
+.upgrade-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.upgrade-visual { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.upgrade-col { display: flex; flex-direction: column; gap: 12px; }
+.upgrade-col:last-child { margin-top: 28px; }
+.upgrade-img-block {
+  border-radius: var(--r); aspect-ratio: 1;
+  background: linear-gradient(135deg, var(--surface), var(--surface2));
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 2.8rem;
+  transition: transform .35s var(--ease-out), border-color .3s;
+  will-change: transform;
+}
+.upgrade-img-block:hover { transform: scale(1.04); border-color: var(--border-h); }
+.upgrade-img-block.accent-bg { background: linear-gradient(135deg, #1C1C1C, rgba(200,240,75,.09)); }
+.upgrade-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(200,240,75,.1); border: 1px solid rgba(200,240,75,.2);
+  color: var(--accent); font-size: .72rem; font-weight: 600;
+  letter-spacing: .07em; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 100px; margin-bottom: 18px;
+}
+.upgrade-title {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(1.7rem, 3vw, 2.7rem);
+  letter-spacing: -.045em; line-height: 1.08; margin-bottom: 18px;
+}
+.upgrade-body { color: var(--muted); font-size: .95rem; line-height: 1.78; margin-bottom: 24px; }
+.upgrade-perks { display: flex; flex-direction: column; gap: 9px; margin-bottom: 30px; }
+.perk-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: .9rem; color: var(--muted);
+}
+.perk-item::before {
+  content: '✦'; color: var(--accent); font-size: .65rem;
+  min-width: 18px; text-align: center;
+}
+.upgrade-cta-accent { color: var(--accent); font-weight: 600; font-size: .95rem; margin-bottom: 22px; }
+.upgrade-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ===== FASILITAS ===== */
+#fasilitas { background: var(--surface); }
+.facilities-grid {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 1px; background: var(--border);
+  border-radius: var(--r); overflow: hidden;
+  margin-top: clamp(32px,5vw,52px);
+  border: 1px solid var(--border);
+}
+.facility-item {
+  background: var(--surface); padding: 28px 22px;
+  display: flex; flex-direction: column; align-items: flex-start;
+  transition: background .25s;
+}
+.facility-item:hover { background: var(--surface2); }
+.fac-icon {
+  width: 46px; height: 46px;
+  background: rgba(200,240,75,.09); border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; margin-bottom: 14px;
+  transition: background .25s, transform .2s;
+}
+.facility-item:hover .fac-icon { background: rgba(200,240,75,.16); transform: scale(1.08); }
+.fac-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: .88rem; margin-bottom: 5px; }
+.fac-desc { font-size: .78rem; color: var(--muted); line-height: 1.55; }
+
+/* ===== LOKASI ===== */
+.lokasi-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+/* Map as clickable link */
+.map-placeholder {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-xl); aspect-ratio: 1; display: flex;
+  align-items: center; justify-content: center;
+  position: relative; overflow: hidden; cursor: pointer;
+  text-decoration: none; display: block;
+  transition: border-color .3s, transform .3s var(--ease-out);
+  will-change: transform;
+}
+.map-placeholder:hover { border-color: var(--border-h); transform: scale(1.01); }
+.map-inner {
+  display: grid; grid-template-columns: repeat(8,1fr); grid-template-rows: repeat(8,1fr);
+  width: 80%; height: 80%; gap: 3px; opacity: .4; position: absolute;
+}
+.map-block { background: var(--border); border-radius: 3px; }
+.map-block.lit { background: rgba(200,240,75,.4); }
+.map-center-pin {
+  position: absolute; width: 44px; height: 44px;
+  background: var(--accent); border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 0 0 12px rgba(200,240,75,.14);
+  display: flex; align-items: center; justify-content: center;
+  transition: box-shadow .3s;
+}
+.map-placeholder:hover .map-center-pin { box-shadow: 0 0 0 18px rgba(200,240,75,.12); }
+.map-center-pin::after {
+  content: ''; width: 16px; height: 16px;
+  background: #0A0A0A; border-radius: 50%; transform: rotate(45deg);
+}
+/* Hover overlay */
+.map-hover-overlay {
+  position: absolute; inset: 0;
+  background: rgba(10,10,10,0);
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--r-xl);
+  transition: background .3s;
+}
+.map-hover-label {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--accent); color: #0A0A0A;
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: .88rem; padding: 12px 22px; border-radius: 100px;
+  opacity: 0; transform: translateY(10px) scale(.95);
+  transition: opacity .28s var(--ease-out), transform .28s var(--ease-out);
+  pointer-events: none;
+}
+.map-placeholder:hover .map-hover-overlay { background: rgba(10,10,10,.55); }
+.map-placeholder:hover .map-hover-label { opacity: 1; transform: translateY(0) scale(1); }
+
+.places-list { display: flex; flex-direction: column; gap: 10px; }
+.place-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+  transition: border-color .2s, transform .2s var(--ease-out);
+  text-decoration: none; color: inherit;
+  will-change: transform;
+}
+.place-item:hover { border-color: var(--border-h); transform: translateX(5px); }
+.place-icon {
+  width: 38px; height: 38px; min-width: 38px;
+  background: var(--surface2); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; transition: background .2s;
+}
+.place-item:hover .place-icon { background: rgba(200,240,75,.1); }
+.place-info { flex: 1; min-width: 0; }
+.place-name { font-weight: 500; font-size: .88rem; }
+.place-type { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+.place-dist { font-size: .8rem; font-weight: 700; color: var(--accent); white-space: nowrap; }
+.map-open-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 16px; width: 100%;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 12px; border-radius: var(--r);
+  font-size: .85rem; font-weight: 600; color: var(--accent);
+  text-decoration: none; cursor: pointer;
+  transition: background .2s, border-color .2s, transform .15s;
+}
+.map-open-btn:hover {
+  background: rgba(200,240,75,.07); border-color: var(--border-h);
+  transform: translateY(-2px);
+}
+
+/* ===== TESTIMONI ===== */
+#testimoni { background: var(--surface); }
+.testimonials-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 16px;
+  margin-top: clamp(32px,5vw,52px);
+}
+.testimonial-card {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 20px; padding: 24px;
+  display: flex; flex-direction: column; gap: 16px;
+  transition: border-color .25s, transform .3s var(--ease-out), box-shadow .3s;
+  will-change: transform;
+}
+.testimonial-card:hover {
+  border-color: var(--border-h); transform: translateY(-5px);
+  box-shadow: 0 18px 44px rgba(200,240,75,.06);
+}
+.testimonial-card.featured {
+  background: linear-gradient(145deg, rgba(200,240,75,.05), var(--bg));
+  border-color: rgba(200,240,75,.22);
+}
+.stars { font-size: .9rem; letter-spacing: 2px; color: #f3cc00; }
+.testimonial-text { font-size: .88rem; color: var(--muted); line-height: 1.72; flex: 1; }
+.testimonial-text::before {
+  content: '"'; color: var(--accent); font-size: 1.6rem;
+  line-height: 0; vertical-align: -.4em; margin-right: 3px;
+}
+.testimonial-author {
+  display: flex; align-items: center; gap: 12px;
+  border-top: 1px solid var(--border); padding-top: 16px;
+}
+.author-avatar {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: .82rem; color: #0A0A0A; flex-shrink: 0;
+}
+.author-name { font-weight: 600; font-size: .87rem; }
+.author-since { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+
+/* ===== HARGA ===== */
+.pricing-grid {
+  display: grid; grid-template-columns: repeat(2,1fr); gap: 24px;
+  margin-top: clamp(32px,5vw,52px); max-width: 860px;
+}
+.price-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r-xl); padding: clamp(24px,4vw,36px) clamp(20px,3vw,32px);
+  position: relative;
+  transition: transform .3s var(--ease-out), box-shadow .3s;
+  will-change: transform;
+}
+.price-card:hover { transform: translateY(-8px); box-shadow: 0 24px 60px rgba(0,0,0,.3); }
+.price-card.popular {
+  background: linear-gradient(150deg, rgba(200,240,75,.08) 0%, var(--surface) 55%);
+  border-color: rgba(200,240,75,.38);
+}
+.popular-badge {
+  position: absolute; top: -14px; left: 28px;
+  background: var(--accent); color: #0A0A0A;
+  font-size: .7rem; font-weight: 800;
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 100px;
+}
+.card-tier {
+  font-family: 'Syne', sans-serif; font-size: .72rem; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+}
+.card-name {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(1.2rem,2vw,1.5rem); margin-bottom: 16px;
+}
+.price-orig { font-size: .95rem; color: var(--muted); text-decoration: line-through; margin-bottom: 4px; }
+.price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
+.price-val {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(2rem,3.5vw,2.6rem); color: var(--text); letter-spacing: -.04em;
+}
+.price-val span { font-size: 1.1rem; vertical-align: super; }
+.price-period { color: var(--muted); font-size: .85rem; }
+.price-tag-sub { font-size: .78rem; color: var(--accent); font-weight: 600; margin-bottom: 16px; }
+.price-desc {
+  font-size: .82rem; color: var(--muted); margin-bottom: 20px;
+  padding-bottom: 20px; border-bottom: 1px solid var(--border); line-height: 1.62;
+}
+.features-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 26px; }
+.features-list li { display: flex; align-items: center; gap: 10px; font-size: .86rem; }
+.features-list li::before {
+  content: '✓'; width: 20px; height: 20px; min-width: 20px;
+  background: rgba(200,240,75,.1); color: var(--accent);
+  border-radius: 50%; font-size: .65rem;
+  display: flex; align-items: center; justify-content: center; font-weight: 800;
+}
+.card-btn-wa {
+  width: 100%; padding: 13px; border-radius: 100px;
+  font-weight: 700; font-size: .9rem; cursor: pointer;
+  transition: transform .15s var(--ease-out), box-shadow .2s;
+  text-align: center; text-decoration: none;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--wa); color: #fff; border: none;
+}
+.card-btn-wa:hover { box-shadow: 0 10px 28px rgba(37,211,102,.35); transform: translateY(-2px); }
+.payment-info {
+  margin-top: 36px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 18px 22px;
+  display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+}
+.payment-label {
+  font-size: .75rem; color: var(--muted); letter-spacing: .07em;
+  text-transform: uppercase; font-weight: 600; white-space: nowrap;
+}
+.payment-methods { display: flex; gap: 8px; flex-wrap: wrap; }
+.pay-badge {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 14px;
+  font-size: .82rem; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; gap: 6px;
+}
+.pay-badge.primary { border-color: rgba(200,240,75,.3); color: var(--accent); }
+.payment-note { flex: 1; text-align: right; font-size: .78rem; color: var(--muted); }
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--surface); border-top: 1px solid var(--border);
+  padding: clamp(40px,7vw,56px) 5vw 32px;
+}
+.footer-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: clamp(28px,5vw,52px); margin-bottom: 40px;
+}
+.footer-brand .logo {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: clamp(1.2rem,2vw,1.5rem); letter-spacing: -.035em; margin-bottom: 12px;
+}
+.footer-brand .logo span { color: var(--accent); }
+.footer-brand p { font-size: .84rem; color: var(--muted); line-height: 1.7; max-width: 240px; margin-bottom: 18px; }
+.social-links { display: flex; gap: 8px; }
+.social-btn {
+  width: 34px; height: 34px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; text-decoration: none;
+  transition: background .2s, border-color .2s, transform .2s;
+}
+.social-btn:hover { background: rgba(200,240,75,.1); border-color: var(--border-h); transform: translateY(-2px); }
+.footer-col h4 {
+  font-family: 'Syne', sans-serif; font-size: .75rem; font-weight: 600;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+}
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.footer-col ul li a {
+  font-size: .875rem; color: var(--muted); text-decoration: none;
+  transition: color .2s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.footer-col ul li a:hover { color: var(--accent); }
+.footer-bottom {
+  border-top: 1px solid var(--border); padding-top: 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: .78rem; color: var(--muted);
+}
+
+/* ===== REVEAL ANIMATION ===== */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity .65s var(--ease-out), transform .65s var(--ease-out);
+}
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .08s; }
+.reveal-delay-2 { transition-delay: .16s; }
+.reveal-delay-3 { transition-delay: .24s; }
+.reveal-delay-4 { transition-delay: .32s; }
+
+/* ===== RESPONSIVE ===== */
+/* Tablet */
+@media (max-width: 1024px) {
+  .facilities-grid { grid-template-columns: repeat(2,1fr); }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .fitur-grid { grid-template-columns: repeat(2,1fr); }
+}
+
+/* Mobile large */
+@media (max-width: 768px) {
+  .nav-links, .nav-right { display: none; }
+  .hamburger { display: flex; }
+
+  #hero {
+    grid-template-columns: 1fr; padding: 110px 5vw 56px;
+    text-align: center;
+  }
+  .hero-desc { margin: 0 auto 28px; }
+  .hero-actions { justify-content: center; }
+  .hero-stats { justify-content: center; gap: 22px; }
+  .hero-visual { display: none; }
+  .hero-badge { margin-left: auto; margin-right: auto; }
+
+  .upgrade-layout { grid-template-columns: 1fr; }
+  .upgrade-visual { display: none; }
+
+  .lokasi-layout { grid-template-columns: 1fr; }
+  .map-placeholder { aspect-ratio: 4/3; }
+
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; max-width: 100%; }
+
+  .footer-grid { grid-template-columns: 1fr; gap: 26px; }
+  .footer-bottom { flex-direction: column; gap: 8px; text-align: center; }
+  .section-header { flex-direction: column; align-items: flex-start; }
+
+  .payment-note { text-align: left; width: 100%; }
+}
+
+/* Mobile small */
+@media (max-width: 480px) {
+  .fitur-grid { grid-template-columns: 1fr; }
+  .hero-stats { flex-wrap: wrap; gap: 16px; justify-content: center; }
+  .hero-stats .stat-item { flex: 1; min-width: 100px; text-align: center; }
+  .payment-info { flex-direction: column; align-items: flex-start; }
+  .facilities-grid { grid-template-columns: 1fr; }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, .reveal { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">Genz<span>ed</span></a>
+  <ul class="nav-links">
+    <li><a href="#fitur">Fitur</a></li>
+    <li><a href="#fasilitas">Fasilitas</a></li>
+    <li><a href="#lokasi">Lokasi</a></li>
+    <li><a href="#testimoni">Testimoni</a></li>
+    <li><a href="#harga">Harga</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="https://wa.link/v5vckc" target="_blank" rel="noopener" class="btn-wa-nav">💬 Hubungi Kami</a>
+  </div>
+  <button class="hamburger" id="hamburger" aria-label="Buka menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-label="Navigasi utama">
+  <a href="#fitur" class="mobile-link">Fitur</a>
+  <a href="#fasilitas" class="mobile-link">Fasilitas</a>
+  <a href="#lokasi" class="mobile-link">Lokasi</a>
+  <a href="#testimoni" class="mobile-link">Testimoni</a>
+  <a href="#harga" class="mobile-link">Harga</a>
+  <a href="https://wa.link/v5vckc" target="_blank" rel="noopener" class="btn-wa">💬 Hubungi Kami</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="hero-glow-2" aria-hidden="true"></div>
+  <div>
+    <div class="hero-badge"><span class="hero-badge-dot" aria-hidden="true"></span>Kos Gen Z · Mood Abiezz</div>
+    <h1 class="hero-title">
+      Suasana<br>
+      <span class="line-accent">Lebih Muda,</span><br>
+      Bikin Betah
+    </h1>
+    <p class="hero-tagline">Suasana Lebih Muda, Bikin Hari Lo Mood Abiezz.</p>
+    <p class="hero-desc">Genzed Kost hadir untuk generasi yang bergerak cepat. Kamar modern, fasilitas nggak kaleng-kaleng, lokasi super strategis.</p>
+    <div class="hero-actions">
+      <a href="#harga" class="btn-primary">Lihat Harga ↓</a>
+      <a href="https://wa.link/v5vckc" target="_blank" rel="noopener" class="btn-wa">💬 Chat Sekarang</a>
+      <a href="#fitur" class="btn-ghost">Lihat Fitur</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="num">120<span>+</span></div>
+        <div class="label">Penghuni Aktif</div>
+      </div>
+      <div class="stat-item">
+        <div class="num">4.8<span>★</span></div>
+        <div class="label">Rating Penghuni</div>
+      </div>
+      <div class="stat-item">
+        <div class="num">3<span>thn</span></div>
+        <div class="label">Berdiri Sejak</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-visual" aria-hidden="true">
+    <div class="floating-tag tag-1">
+      <div class="tag-icon">🔒</div>
+      <div><div class="tag-label">Keamanan</div><div class="tag-value">24 Jam CCTV</div></div>
+    </div>
+    <div class="room-card-main">
+      <div class="room-img-placeholder">
+        <svg class="room-svg" viewBox="0 0 380 280" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="20" y="220" width="340" height="8" rx="2" fill="#2A2A2A"/>
+          <rect x="20" y="50" width="340" height="172" fill="#1C1C1C"/>
+          <rect x="20" y="50" width="8" height="172" fill="#222"/>
+          <rect x="352" y="50" width="8" height="172" fill="#222"/>
+          <rect x="60" y="70" width="100" height="80" rx="4" fill="url(#wg)" stroke="#333" stroke-width="2"/>
+          <line x1="110" y1="70" x2="110" y2="150" stroke="#333" stroke-width="1.5"/>
+          <line x1="60" y1="110" x2="160" y2="110" stroke="#333" stroke-width="1.5"/>
+          <rect x="180" y="140" width="170" height="90" rx="8" fill="#252525" stroke="#333" stroke-width="1.5"/>
+          <rect x="180" y="140" width="170" height="28" rx="8" fill="#2E2E2E"/>
+          <rect x="192" y="148" width="52" height="20" rx="6" fill="#3A3A3A"/>
+          <rect x="254" y="148" width="52" height="20" rx="6" fill="#3A3A3A"/>
+          <rect x="180" y="168" width="170" height="62" fill="#1E1E1E" stroke="#333" stroke-width="1"/>
+          <rect x="182" y="170" width="166" height="4" rx="1" fill="rgba(200,240,75,0.15)"/>
+          <rect x="30" y="168" width="130" height="58" rx="6" fill="#202020" stroke="#333" stroke-width="1.5"/>
+          <rect x="50" y="140" width="72" height="48" rx="4" fill="#161616" stroke="#333" stroke-width="1.5"/>
+          <rect x="52" y="142" width="68" height="44" rx="3" fill="rgba(200,240,75,0.08)"/>
+          <rect x="58" y="148" width="30" height="3" rx="1" fill="rgba(200,240,75,0.3)"/>
+          <rect x="58" y="155" width="50" height="2" rx="1" fill="rgba(255,255,255,0.08)"/>
+          <rect x="82" y="186" width="6" height="6" rx="1" fill="#222"/>
+          <circle cx="148" cy="148" r="12" fill="rgba(200,240,75,0.12)"/>
+          <line x1="148" y1="158" x2="148" y2="172" stroke="#555" stroke-width="2"/>
+          <ellipse cx="148" cy="144" rx="10" ry="5" fill="#2A2A2A" stroke="#444" stroke-width="1"/>
+          <ellipse cx="148" cy="144" rx="5" ry="2.5" fill="rgba(200,240,75,0.5)"/>
+          <rect x="220" y="54" width="80" height="26" rx="6" fill="#1A1A1A" stroke="#333" stroke-width="1"/>
+          <rect x="224" y="63" width="72" height="6" rx="2" fill="#242424"/>
+          <circle cx="288" cy="58" r="3" fill="rgba(200,240,75,0.8)"/>
+          <defs>
+            <linearGradient id="wg" x1="60" y1="70" x2="160" y2="150" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="rgba(200,240,75,0.06)"/>
+              <stop offset="100%" stop-color="rgba(100,150,200,0.08)"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <div class="room-card-info">
+        <div class="room-name">Starter Pack Room</div>
+        <div class="room-price">Mulai Rp 800rb/bulan</div>
+      </div>
+    </div>
+    <div class="floating-tag tag-2">
+      <div class="tag-icon">📶</div>
+      <div><div class="tag-label">Internet</div><div class="tag-value">100 Mbps</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap" aria-hidden="true">
+  <div class="marquee-track">
+    <span>Metode Pembayaran</span>
+    <span>Bank Jago — Utama</span>
+    <span>QRIS</span>
+    <span>Starter Pack Room Rp 800rb</span>
+    <span>Big Mood Suite Rp 1 Juta</span>
+    <span>Metode Pembayaran</span>
+    <span>Bank Jago — Utama</span>
+    <span>QRIS</span>
+    <span>Starter Pack Room Rp 800rb</span>
+    <span>Big Mood Suite Rp 1 Juta</span>
+  </div>
+</div>
+
+<!-- FITUR -->
+<section id="fitur">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-eyebrow">Keunggulan Kami</div>
+      <h2 class="section-title">Pilihan Kost<br>Nyaman</h2>
+    </div>
+    <p class="section-sub">Semua yang lo butuhin dalam satu tempat. No drama, pure comfort.</p>
+  </div>
+  <div class="fitur-grid">
+    <div class="fitur-card reveal reveal-delay-1">
+      <div class="fitur-card-img">🛏️</div>
+      <div class="fitur-card-body">
+        <div class="fitur-card-title">Luas</div>
+        <div class="fitur-card-desc">Kamar spacious yang bikin lo bebas ekspresiin diri. Cukup buat semua setup lo.</div>
+      </div>
+    </div>
+    <div class="fitur-card reveal reveal-delay-2">
+      <div class="fitur-card-img">🪴</div>
+      <div class="fitur-card-body">
+        <div class="fitur-card-title">Sederhana</div>
+        <div class="fitur-card-desc">Desain clean & minimalis. Less clutter, more focus. Vibe yang bikin produktif.</div>
+      </div>
+    </div>
+    <div class="fitur-card reveal reveal-delay-3">
+      <div class="fitur-card-img">📶</div>
+      <div class="fitur-card-body">
+        <div class="fitur-card-title">WiFi up to 100 Mbps</div>
+        <div class="fitur-card-desc">Koneksi fiber optik stabil 24 jam. Streaming, gaming, WFH — semua lancar jaya.</div>
+      </div>
+    </div>
+    <div class="fitur-card reveal reveal-delay-1">
+      <div class="fitur-card-img">🌅</div>
+      <div class="fitur-card-body">
+        <div class="fitur-card-title">Friendly Rooftop</div>
+        <div class="fitur-card-desc">Area rooftop buat nongkrong, sunset vibes, atau sekadar cari udara segar.</div>
+      </div>
+    </div>
+    <div class="fitur-card reveal reveal-delay-2">
+      <div class="fitur-card-img">📍</div>
+      <div class="fitur-card-body">
+        <div class="fitur-card-title">Strategis</div>
+        <div class="fitur-card-desc">Dekat kampus, kantor, transportasi publik & pusat kuliner. Lo hemat waktu setiap hari.</div>
+      </div>
+    </div>
+    <div class="fitur-card reveal reveal-delay-3">
+      <div class="fitur-card-img">✨</div>
+      <div class="fitur-card-body">
+        <div class="fitur-card-title">Modern</div>
+        <div class="fitur-card-desc">Fasilitas terus di-upgrade. Kami nggak stuck — terus berinovasi buat lo.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVING UPGRADE -->
+<section id="upgrade">
+  <div class="upgrade-layout">
+    <div class="upgrade-visual reveal">
+      <div class="upgrade-col">
+        <div class="upgrade-img-block accent-bg">🛋️</div>
+        <div class="upgrade-img-block">🌿</div>
+      </div>
+      <div class="upgrade-col">
+        <div class="upgrade-img-block">☕</div>
+        <div class="upgrade-img-block accent-bg">💻</div>
+      </div>
+    </div>
+    <div class="upgrade-content reveal reveal-delay-2">
+      <div class="upgrade-tag">🔥 Philosophy</div>
+      <h2 class="upgrade-title">"Living Upgrade,<br>On Us" 🔥</h2>
+      <p class="upgrade-body">
+        Kalian yang request, kami yang deliver — dengan extra flavor.<br><br>
+        Di Genzed Kost, inovasi bukan cuma jargon. Ini proses kami: identifikasi pain points lo, cari solusi kreatif, lalu kasih lebih dari ekspektasi lo.
+      </p>
+      <div class="upgrade-perks">
+        <div class="perk-item">Pengalaman nge-kost yang nggak cuma nyaman</div>
+        <div class="perk-item">Tapi bener-bener nge-boost produktivitas lo</div>
+        <div class="perk-item">Dan yang paling penting — happiness lo</div>
+      </div>
+      <p class="upgrade-cta-accent">Discover the Perks 🎯</p>
+      <div class="upgrade-actions">
+        <a href="#harga" class="btn-primary">Temukan Kamar</a>
+        <a href="https://wa.link/v5vckc" target="_blank" rel="noopener" class="btn-wa">💬 Tanya-Tanya</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FASILITAS -->
+<section id="fasilitas">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-eyebrow">Apa yang Kami Sediakan</div>
+      <h2 class="section-title">Fasilitas Lengkap<br>untuk Hidupmu</h2>
+    </div>
+    <p class="section-sub">Setiap fasilitas dirancang agar lo bisa fokus hal yang paling penting.</p>
+  </div>
+  <div class="facilities-grid">
+    <div class="facility-item reveal reveal-delay-1"><div class="fac-icon">🌐</div><div class="fac-title">WiFi Super Cepat</div><div class="fac-desc">Fiber optik 100 Mbps stabil 24 jam.</div></div>
+    <div class="facility-item reveal reveal-delay-2"><div class="fac-icon">❄️</div><div class="fac-title">AC di Setiap Kamar</div><div class="fac-desc">AC inverter hemat energi tiap kamar.</div></div>
+    <div class="facility-item reveal reveal-delay-3"><div class="fac-icon">🚿</div><div class="fac-title">Kamar Mandi Dalam</div><div class="fac-desc">Privat, bersih, dengan water heater.</div></div>
+    <div class="facility-item reveal reveal-delay-4"><div class="fac-icon">🔒</div><div class="fac-title">Keamanan 24 Jam</div><div class="fac-desc">CCTV full area + petugas keamanan.</div></div>
+    <div class="facility-item reveal reveal-delay-1"><div class="fac-icon">🌅</div><div class="fac-title">Friendly Rooftop</div><div class="fac-desc">Area santai & nongkrong eksklusif.</div></div>
+    <div class="facility-item reveal reveal-delay-2"><div class="fac-icon">🧺</div><div class="fac-title">Laundry</div><div class="fac-desc">Mesin cuci + layanan laundry kiloan.</div></div>
+    <div class="facility-item reveal reveal-delay-3"><div class="fac-icon">🍳</div><div class="fac-title">Dapur Bersama</div><div class="fac-desc">Bersih, lengkap, kulkas & peralatan masak.</div></div>
+    <div class="facility-item reveal reveal-delay-4"><div class="fac-icon">🅿️</div><div class="fac-title">Parkir Aman</div><div class="fac-desc">Area parkir motor luas untuk penghuni.</div></div>
+  </div>
+</section>
+
+<!-- LOKASI -->
+<section id="lokasi">
+  <div class="lokasi-layout">
+    <div class="reveal">
+      <div class="section-eyebrow">Dimana Kami Berada</div>
+      <h2 class="section-title">Lokasi Super<br>Strategis</h2>
+      <p class="section-sub" style="margin-bottom:28px;">Dekat kampus, pusat kota, kuliner, dan transportasi umum. Lo hemat waktu setiap hari.</p>
+      <div class="places-list">
+        <div class="place-item"><div class="place-icon">🎓</div><div class="place-info"><div class="place-name">Universitas / Kampus</div><div class="place-type">Pendidikan</div></div><div class="place-dist">500 m</div></div>
+        <div class="place-item"><div class="place-icon">🛒</div><div class="place-info"><div class="place-name">Supermarket & Mini Market</div><div class="place-type">Kebutuhan Sehari-hari</div></div><div class="place-dist">200 m</div></div>
+        <div class="place-item"><div class="place-icon">🏥</div><div class="place-info"><div class="place-name">Rumah Sakit Umum</div><div class="place-type">Layanan Kesehatan</div></div><div class="place-dist">1.2 km</div></div>
+        <div class="place-item"><div class="place-icon">🚌</div><div class="place-info"><div class="place-name">Halte Trans & Stasiun</div><div class="place-type">Transportasi Umum</div></div><div class="place-dist">300 m</div></div>
+        <div class="place-item"><div class="place-icon">☕</div><div class="place-info"><div class="place-name">Coffee Shop & Kuliner</div><div class="place-type">Makan & Nongkrong</div></div><div class="place-dist">100 m</div></div>
+        <div class="place-item"><div class="place-icon">🏢</div><div class="place-info"><div class="place-name">Kawasan Perkantoran</div><div class="place-type">Bisnis & Kerja</div></div><div class="place-dist">1.5 km</div></div>
+      </div>
+    </div>
+
+    <div class="reveal reveal-delay-2">
+      <!-- Map links to Google Maps -->
+      <a
+        href="https://maps.app.goo.gl/9yuf1aS3yCpAdUzGA"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="map-placeholder"
+        aria-label="Buka lokasi Genzed Kost di Google Maps"
+      >
+        <div class="map-inner" id="mapGrid" aria-hidden="true"></div>
+        <div class="map-center-pin" aria-hidden="true"></div>
+        <div class="map-hover-overlay" aria-hidden="true">
+          <div class="map-hover-label">📍 Buka di Google Maps</div>
+        </div>
+      </a>
+
+      <a
+        href="https://maps.app.goo.gl/9yuf1aS3yCpAdUzGA"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="map-open-btn"
+      >
+        📍 Lihat Lokasi di Google Maps
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONI -->
+<section id="testimoni">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-eyebrow">Kata Mereka</div>
+      <h2 class="section-title">Testimoni<br>Penghuni Kost</h2>
+    </div>
+    <p class="section-sub">Apa yang dikatakannya tentang Genzed Kost?</p>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card featured reveal reveal-delay-1">
+      <div class="stars">★★★★☆</div>
+      <p class="testimonial-text">Bekerja dengan tim ini sangat mulus dari awal sampai akhir. Profisiensi serta pendekatan teliti mereka sangat meningkatkan kualitas pengalaman saya. Saya sangat puas!</p>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background:var(--accent);">SM</div>
+        <div><div class="author-name">Sullivan Mitchell</div><div class="author-since">Penghuni aktif · Starter Pack Room</div></div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal reveal-delay-2">
+      <div class="stars">★★★★☆</div>
+      <p class="testimonial-text">Working here was smooth and efficient at every stage. Their skills and commitment to quality had a major impact. I am thrilled with the experience!</p>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background:#4ECDC4;">JC</div>
+        <div><div class="author-name">James Carter</div><div class="author-since">Penghuni aktif · Big Mood Suite</div></div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal reveal-delay-3">
+      <div class="stars">★★★★☆</div>
+      <p class="testimonial-text">Berpartner dengan tim kos ini sangat mudah dari awal sampai akhir. Pengetahuan serta fokus mereka ke detail sangat bermanfaat. Saya sangat bahagia!</p>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background:#FF6B9D;">LE</div>
+        <div><div class="author-name">Laura Evans</div><div class="author-since">Penghuni aktif · Big Mood Suite</div></div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal reveal-delay-1">
+      <div class="stars">★★★★☆</div>
+      <p class="testimonial-text">Dari pertemuan pertama, sudah jelas kami berada di tangan yang tepat. Mereka mengambil visi kami dan mengubahnya menjadi sesuatu yang lebih baik. Sangat kami sarankan!</p>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background:#A78BFA;">JR</div>
+        <div><div class="author-name">Jody Roberts</div><div class="author-since">Penghuni aktif · Starter Pack Room</div></div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal reveal-delay-2">
+      <div class="stars">★★★★☆</div>
+      <p class="testimonial-text">Layanan luar biasa dan komunikasi hebat melalui seluruh prosesnya. Mereka melakukan semuanya untuk memastikan pengalaman tinggal kami pasti nyaman dan sukses.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background:#F59E0B;">EF</div>
+        <div><div class="author-name">Emil Foster</div><div class="author-since">Penghuni aktif · Big Mood Suite</div></div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal reveal-delay-3">
+      <div class="stars">★★★★☆</div>
+      <p class="testimonial-text">Tim ini betul-betul memahami arti dari partnership. Mereka membawa ide-ide baru dan menyediakan pengalaman tinggal yang melampaui harapan.</p>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background:#34D399;">DC</div>
+        <div><div class="author-name">Daniella Clarke</div><div class="author-since">Penghuni aktif · Starter Pack Room</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HARGA -->
+<section id="harga">
+  <div class="section-header reveal">
+    <div>
+      <div class="section-eyebrow">Harga Kamar</div>
+      <h2 class="section-title">Harga Transparan,<br>Fasilitas Jelas</h2>
+    </div>
+    <p class="section-sub">Temukan harga terbaik untuk lo. Nyaman, Luas, Aman.</p>
+  </div>
+
+  <div class="pricing-grid">
+    <div class="price-card reveal reveal-delay-1">
+      <div class="card-tier">Untuk Mahasiswa</div>
+      <div class="card-name">Starter Pack Room</div>
+      <div class="price-orig">Rp 950.000</div>
+      <div class="price-row">
+        <div class="price-val"><span>Rp</span>800rb</div>
+        <div class="price-period">/ bulan</div>
+      </div>
+      <div class="price-tag-sub">Hemat Rp 150.000 🎉</div>
+      <p class="price-desc">Cocok untuk Mahasiswa. Ruang yang cukup untuk memisahkan zona tidur, kerja, dan relaksasi.</p>
+      <ul class="features-list">
+        <li>Luas 3×4 meter</li>
+        <li>Kamar Mandi Dalam</li>
+        <li>WC Jongkok</li>
+        <li>Wastafel</li>
+        <li>Fasilitas Kamar</li>
+        <li>Parkir Motor</li>
+        <li>Akses WiFi 100 Mbps</li>
+        <li>Akses Rooftop & Dapur Bersama</li>
+      </ul>
+      <a href="https://wa.link/v5vckc" target="_blank" rel="noopener" class="card-btn-wa">💬 Hubungi Sekarang</a>
+    </div>
+
+    <div class="price-card popular reveal reveal-delay-2">
+      <div class="popular-badge">🔥 Paling Diminati</div>
+      <div class="card-tier">Mahasiswa / Karyawan</div>
+      <div class="card-name">Big Mood Suite</div>
+      <div class="price-orig">Rp 1.250.000</div>
+      <div class="price-row">
+        <div class="price-val"><span>Rp</span>1 Jt</div>
+        <div class="price-period">/ bulan</div>
+      </div>
+      <div class="price-tag-sub">Hemat Rp 250.000 💥</div>
+      <p class="price-desc">Cocok untuk Mahasiswa/i & Karyawan/i. Luas yang memberikan kebebasan menata sesuai kepribadian.</p>
+      <ul class="features-list">
+        <li>Luas 3×4 meter</li>
+        <li>Kamar Mandi Dalam</li>
+        <li>WC Duduk ✨</li>
+        <li>Wastafel</li>
+        <li>Fasilitas Kamar Lengkap</li>
+        <li>Parkir Motor</li>
+        <li>WiFi 100 Mbps Priority</li>
+        <li>Akses Rooftop & Dapur Bersama</li>
+      </ul>
+      <a href="https://wa.link/v5vckc" target="_blank" rel="noopener" class="card-btn-wa">💬 Hubungi Sekarang</a>
+    </div>
+  </div>
+
+  <div class="payment-info reveal">
+    <div class="payment-label">Metode Pembayaran</div>
+    <div class="payment-methods">
+      <div class="pay-badge primary">🏦 Bank Jago (Utama)</div>
+      <div class="pay-badge">📱 QRIS</div>
+    </div>
+    <div class="payment-note">Semua harga inklusif — tidak ada biaya tersembunyi.</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand reveal">
+      <div class="logo">Genz<span>ed</span></div>
+      <p>Hunian modern untuk generasi yang bergerak. Nyaman, stylish, dan terjangkau — tepat di jantung kota.</p>
+      <div class="social-links">
+        <a href="#" class="social-btn" aria-label="Twitter / X">𝕏</a>
+        <a href="#" class="social-btn" aria-label="Instagram">📸</a>
+        <a href="https://wa.link/v5vckc" target="_blank" rel="noopener" class="social-btn" aria-label="WhatsApp">💬</a>
+        <a href="#" class="social-btn" aria-label="YouTube">▶</a>
+      </div>
+    </div>
+    <div class="footer-col reveal reveal-delay-1">
+      <h4>Navigasi</h4>
+      <ul>
+        <li><a href="#fitur">Fitur Kost</a></li>
+        <li><a href="#fasilitas">Fasilitas</a></li>
+        <li><a href="#lokasi">Lokasi</a></li>
+        <li><a href="#testimoni">Testimoni</a></li>
+        <li><a href="#harga">Harga Kamar</a></li>
+      </ul>
+    </div>
+    <div class="footer-col reveal reveal-delay-2">
+      <h4>Info</h4>
+      <ul>
+        <li><a href="#">Tentang Genzed</a></li>
+        <li><a href="#">Peraturan Kost</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">Karir</a></li>
+      </ul>
+    </div>
+    <div class="footer-col reveal reveal-delay-3">
+      <h4>Kontak</h4>
+      <ul>
+        <li><a href="https://wa.link/v5vckc" target="_blank" rel="noopener">💬 WhatsApp Kami</a></li>
+        <li><a href="mailto:halo@genzedkost.id">halo@genzedkost.id</a></li>
+        <li><a href="https://maps.app.goo.gl/9yuf1aS3yCpAdUzGA" target="_blank" rel="noopener">📍 Alamat Kost</a></li>
+        <li><a href="#">Bank Jago · QRIS</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Genzed Kost. All rights reserved.</span>
+    <span>Dibuat dengan ❤️ untuk generasi masa kini</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Hamburger / Mobile Menu ── */
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+
+  function toggleMenu(open) {
+    hamburger.classList.toggle('active', open);
+    mobileMenu.classList.toggle('open', open);
+    hamburger.setAttribute('aria-expanded', open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+
+  hamburger.addEventListener('click', () => toggleMenu(!mobileMenu.classList.contains('open')));
+  document.querySelectorAll('.mobile-link').forEach(l =>
+    l.addEventListener('click', () => toggleMenu(false))
+  );
+  document.querySelectorAll('.mobile-menu .btn-wa').forEach(l =>
+    l.addEventListener('click', () => toggleMenu(false))
+  );
+
+  /* ── Scroll Reveal ── */
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  /* ── Navbar scroll style ── */
+  const navbar = document.getElementById('navbar');
+  let ticking = false;
+
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        navbar.classList.toggle('scrolled', window.scrollY > 60);
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  /* ── Map grid (deterministic) ── */
+  const mapGrid = document.getElementById('mapGrid');
+  if (mapGrid) {
+    const litSet = new Set([3,4,10,11,12,19,20,21,27,28,29,35,36,43,44,45,51,52]);
+    const frag = document.createDocumentFragment();
+    // seeded pseudo-random so layout is consistent across renders
+    function seeded(n) { let x = Math.sin(n * 9301 + 49297) * 233280; return x - Math.floor(x); }
+    for (let i = 0; i < 64; i++) {
+      const b = document.createElement('div');
+      b.className = 'map-block' + (litSet.has(i) || seeded(i) > .7 ? ' lit' : '');
+      frag.appendChild(b);
+    }
+    mapGrid.appendChild(frag);
+  }
+
+  /* ── Close menu on Escape ── */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && mobileMenu.classList.contains('open')) toggleMenu(false);
+  });
+})();
+</script>
+</body>
+</html>
