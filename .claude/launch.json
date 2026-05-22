@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Genzed Kost (PowerShell serve)",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": [
+        "-ExecutionPolicy", "Bypass",
+        "-File", "C:\\Users\\lenovo LOQ\\Genzed-Kost.github.io\\serve.ps1",
+        "-Port", "3000"
+      ],
+      "port": 3000
+    }
+  ]
+}
