@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Genzed Kost Logo">
+  <defs>
+    <radialGradient id="bg" cx="38%" cy="34%" r="70%">
+      <stop offset="0%" stop-color="#252420"/>
+      <stop offset="100%" stop-color="#0D0C0B"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="circ"><circle cx="256" cy="256" r="256"/></clipPath>
+  </defs>
+
+  <!-- Base circle -->
+  <circle cx="256" cy="256" r="256" fill="url(#bg)"/>
+
+  <!-- Outer accent ring -->
+  <circle cx="256" cy="256" r="244" fill="none" stroke="#C8F04B" stroke-width="3.5" opacity="0.55"/>
+  <!-- Inner subtle ring -->
+  <circle cx="256" cy="256" r="236" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+
+  <!-- ── HOUSE ICON ── -->
+  <!-- Roof -->
+  <polyline
+    points="256,136  160,236  352,236"
+    fill="none" stroke="#F2EDE6" stroke-width="16"
+    stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Overhang caps -->
+  <line x1="152" y1="236" x2="172" y2="236" stroke="#F2EDE6" stroke-width="16" stroke-linecap="round"/>
+  <line x1="340" y1="236" x2="360" y2="236" stroke="#F2EDE6" stroke-width="16" stroke-linecap="round"/>
+
+  <!-- House body -->
+  <rect x="180" y="236" width="152" height="104"
+        fill="none" stroke="#F2EDE6" stroke-width="14"
+        stroke-linejoin="round"/>
+
+  <!-- Door (arch top) -->
+  <path d="M228,340 L228,285 Q256,262 284,285 L284,340"
+        fill="none" stroke="#F2EDE6" stroke-width="11"
+        stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- Window left -->
+  <rect x="194" y="255" width="32" height="28" rx="3"
+        fill="rgba(200,240,75,0.12)" stroke="#F2EDE6" stroke-width="9"/>
+  <line x1="210" y1="255" x2="210" y2="283" stroke="#F2EDE6" stroke-width="5"/>
+
+  <!-- Window right -->
+  <rect x="286" y="255" width="32" height="28" rx="3"
+        fill="rgba(200,240,75,0.12)" stroke="#F2EDE6" stroke-width="9"/>
+  <line x1="302" y1="255" x2="302" y2="283" stroke="#F2EDE6" stroke-width="5"/>
+
+  <!-- ── DIVIDER LINE ── -->
+  <line x1="160" y1="366" x2="352" y2="366"
+        stroke="rgba(200,240,75,0.3)" stroke-width="1.5"/>
+
+  <!-- ── TEXT: GENZED ── -->
+  <text x="256" y="410"
+        text-anchor="middle"
+        font-family="'Arial Black','Arial',sans-serif"
+        font-size="62" font-weight="900"
+        fill="#F2EDE6" letter-spacing="-1"
+        filter="url(#glow)">GENZED</text>
+
+  <!-- ── TEXT: KOST ── -->
+  <text x="256" y="452"
+        text-anchor="middle"
+        font-family="Arial,sans-serif"
+        font-size="30" font-weight="700"
+        fill="#C8F04B" letter-spacing="11">KOST</text>
+
+  <!-- Accent dots -->
+  <circle cx="182" cy="472" r="5" fill="#C8F04B" opacity="0.5"/>
+  <circle cx="256" cy="476" r="4" fill="#C8F04B" opacity="0.35"/>
+  <circle cx="330" cy="472" r="5" fill="#C8F04B" opacity="0.5"/>
+</svg>

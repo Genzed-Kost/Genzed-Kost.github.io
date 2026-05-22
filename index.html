@@ -12,6 +12,11 @@
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
 <link rel="canonical" href="https://genzed-kost.github.io/">
 
+<!-- ═══ Favicon ═══ -->
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" type="image/png" sizes="512x512" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+
 <!-- ═══ Geo Tags ═══ -->
 <meta name="geo.region" content="ID-BT">
 <meta name="geo.placename" content="Serang, Banten, Indonesia">
@@ -184,9 +189,17 @@ nav {
 }
 nav.scrolled { background: rgba(10,10,10,.97); box-shadow: 0 1px 0 var(--border); }
 .nav-logo {
+  display: flex; align-items: center; gap: 9px;
   font-family: 'Syne', sans-serif; font-weight: 800;
   font-size: clamp(1.25rem, 2vw, 1.5rem);
   letter-spacing: -.035em; color: var(--text); text-decoration: none;
+}
+.nav-logo-img {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1.5px rgba(200,240,75,.4);
 }
 .nav-logo span { color: var(--accent); }
 .nav-links { display: flex; gap: 28px; list-style: none; }
@@ -978,7 +991,10 @@ footer {
 
 <!-- NAVBAR -->
 <nav id="navbar">
-  <a href="#hero" class="nav-logo">Genz<span>ed</span></a>
+  <a href="#hero" class="nav-logo">
+    <img src="logo.png" alt="" class="nav-logo-img" aria-hidden="true" width="32" height="32">
+    Genz<span>ed</span>
+  </a>
   <ul class="nav-links">
     <li><a href="#fitur">Fitur</a></li>
     <li><a href="#fasilitas">Fasilitas</a></li>
