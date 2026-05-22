@@ -206,6 +206,19 @@ nav.scrolled { background: rgba(10,10,10,.97); box-shadow: 0 1px 0 var(--border)
 .nav-links a:hover { color: var(--text); }
 .nav-links a:hover::after { transform: scaleX(1); }
 .nav-right { display: flex; align-items: center; gap: 10px; }
+.nav-clock {
+  font-family: 'Syne', sans-serif;
+  font-size: .76rem; font-weight: 700; letter-spacing: .06em;
+  color: var(--accent);
+  background: rgba(200,240,75,.07);
+  border: 1px solid rgba(200,240,75,.16);
+  border-radius: 8px; padding: 5px 11px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap; user-select: none;
+  display: flex; align-items: center; gap: 1px;
+}
+.clock-sep { animation: clk-blink 1s step-end infinite; }
+@keyframes clk-blink { 0%,100%{opacity:1} 50%{opacity:.15} }
 .btn-wa-nav {
   background: var(--wa); color: #fff; border: none;
   padding: 9px 18px; border-radius: 100px;
@@ -974,6 +987,9 @@ footer {
     <li><a href="#harga">Harga</a></li>
   </ul>
   <div class="nav-right">
+    <div class="nav-clock" id="navClock" aria-label="Jam saat ini">
+      <span id="clkH">00</span><span class="clock-sep">:</span><span id="clkM">00</span><span class="clock-sep">:</span><span id="clkS">00</span>
+    </div>
     <a href="https://wa.link/v5vckc" target="_blank" rel="noopener" class="btn-wa-nav">💬 Hubungi Kami</a>
   </div>
   <button class="hamburger" id="hamburger" aria-label="Buka menu" aria-expanded="false">
@@ -1547,6 +1563,22 @@ footer {
     }
     mapGrid.appendChild(frag);
   }
+
+  /* ── Digital Clock ── */
+  (function () {
+    const p = v => String(v).padStart(2, '0');
+    const hEl = document.getElementById('clkH');
+    const mEl = document.getElementById('clkM');
+    const sEl = document.getElementById('clkS');
+    function tick() {
+      const n = new Date();
+      hEl.textContent = p(n.getHours());
+      mEl.textContent = p(n.getMinutes());
+      sEl.textContent = p(n.getSeconds());
+    }
+    tick();
+    setInterval(tick, 1000);
+  })();
 
   /* ── Close menu on Escape ── */
   document.addEventListener('keydown', e => {
