@@ -10,10 +10,11 @@ interface ImportMeta {
 }
 
 // Dimuat lewat <script> tag di index.html (CDN), bukan npm package.
-declare const QRCode: new (
-  element: HTMLElement,
-  options: { text: string; width: number; height: number; colorDark: string; colorLight: string; correctLevel: number }
-) => unknown;
-declare namespace QRCode {
-  const CorrectLevel: { H: number };
+interface QRCodeStatic {
+  new (
+    element: HTMLElement,
+    options: { text: string; width: number; height: number; colorDark: string; colorLight: string; correctLevel: number }
+  ): unknown;
+  CorrectLevel: { L: number; M: number; Q: number; H: number };
 }
+declare const QRCode: QRCodeStatic;
