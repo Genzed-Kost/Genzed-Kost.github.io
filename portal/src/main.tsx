@@ -1,6 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
 import "./styles/global.css";
 
 const root = ReactDOM.createRoot(document.getElementById("root")!);
@@ -9,8 +8,12 @@ const missingEnv = !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_S
 
 if (missingEnv) {
   // Belum ada VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY (GitHub secret belum di-set,
-  // atau Supabase project belum dibuat) — tampilkan pesan jelas alih-alih membiarkan
-  // Supabase client melempar error mentah yang bikin layar putih/hitam kosong.
+  // atau Supabase project belum dibuat). PENTING: "./App" di-import secara DYNAMIC
+  // di sini (bukan `import App from "./App"` di atas) karena import statis akan
+  // langsung dieksekusi seluruh module graph-nya (App -> AuthContext ->
+  // supabaseClient.ts -> createClient(...)) begitu file ini dimuat, walau <App />
+  // nggak pernah dirender — itu yang bikin layar kosong crash sebelumnya meskipun
+  // sudah dicek missingEnv duluan.
   root.render(
     <div style={{ display: "grid", placeItems: "center", minHeight: "100svh", padding: "40px 5vw", textAlign: "center" }}>
       <div style={{ maxWidth: 420 }}>
@@ -26,9 +29,11 @@ if (missingEnv) {
     </div>
   );
 } else {
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
+  import("./App").then(({ default: App }) => {
+    root.render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+  });
 }
