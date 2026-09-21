@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Halaman Tidak Ditemukan | Genzed Kost</title>
+<meta name="robots" content="noindex" />
+<style>
+  :root { --bg:#0A0A0A; --text:#F2EDE6; --muted:#888880; --accent:#C8F04B; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text); font-family: system-ui, sans-serif;
+    min-height: 100svh; display: grid; place-items: center; text-align: center; padding: 40px 5vw;
+  }
+  h1 { font-size: 1.8rem; margin-bottom: 10px; }
+  p { color: var(--muted); margin-bottom: 20px; }
+  a { color: var(--accent); text-decoration: underline; }
+</style>
+<script>
+  // Rute portal (/penghuni/*, /admin/*) ditangani React Router, bukan file statis.
+  // GitHub Pages nge-serve 404.html ini untuk path yang nggak ada filenya —
+  // kalau path-nya milik portal, simpan URL asli lalu redirect ke app-nya.
+  (function () {
+    var path = location.pathname;
+    var isPortalRoute = /^\/(penghuni|admin|bayar)(\/|$)/.test(path);
+    if (isPortalRoute) {
+      sessionStorage.setItem("spa-redirect", path + location.search + location.hash);
+      location.replace("/app/");
+    }
+  })();
+</script>
+</head>
+<body>
+  <div>
+    <h1>404 — Halaman Nggak Ketemu</h1>
+    <p>Halaman yang lo cari nggak ada.</p>
+    <a href="/">Kembali ke Beranda</a>
+  </div>
+</body>
+</html>

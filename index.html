@@ -240,6 +240,14 @@ nav.scrolled { background: rgba(10,10,10,.97); box-shadow: 0 1px 0 var(--border)
   transition: transform .15s, box-shadow .2s;
 }
 .btn-wa-nav:hover { transform: scale(1.04); box-shadow: 0 6px 22px rgba(37,211,102,.35); }
+.btn-login-nav {
+  background: transparent; color: var(--text); border: 1px solid var(--border);
+  padding: 9px 18px; border-radius: 100px;
+  font-weight: 600; font-size: .82rem; cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 6px;
+  transition: border-color .2s, background .2s, transform .15s;
+}
+.btn-login-nav:hover { border-color: var(--border-h); background: rgba(200,240,75,.05); transform: translateY(-1px); }
 .hamburger {
   display: none; flex-direction: column; gap: 5px;
   cursor: pointer; background: none; border: none; padding: 6px;
@@ -1006,6 +1014,7 @@ footer {
     <div class="nav-clock" id="navClock" aria-label="Jam saat ini">
       <span id="clkH">00</span><span class="clock-sep">:</span><span id="clkM">00</span><span class="clock-sep">:</span><span id="clkS">00</span>
     </div>
+    <a href="/penghuni/login" class="btn-login-nav">🔑 Login Penghuni</a>
     <a href="https://wa.link/v5vckc" target="_blank" rel="noopener" class="btn-wa-nav">💬 Hubungi Kami</a>
   </div>
   <button class="hamburger" id="hamburger" aria-label="Buka menu" aria-expanded="false">
@@ -1020,6 +1029,7 @@ footer {
   <a href="#lokasi" class="mobile-link">Lokasi</a>
   <a href="#testimoni" class="mobile-link">Testimoni</a>
   <a href="#harga" class="mobile-link">Harga</a>
+  <a href="/penghuni/login" class="mobile-link" style="font-size: clamp(1.1rem, 4vw, 1.3rem);">🔑 Login Penghuni</a>
   <a href="https://wa.link/v5vckc" target="_blank" rel="noopener" class="btn-wa">💬 Hubungi Kami</a>
 </div>
 

@@ -1,0 +1,22 @@
+# Konfigurasi Supabase CLI untuk development lokal.
+# project_id diisi otomatis saat `supabase init` / `supabase link`.
+project_id = "genzed-kost"
+
+[api]
+enabled = true
+port = 54321
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["https://genzed-kost.github.io"]
+
+[edge_runtime]
+enabled = true

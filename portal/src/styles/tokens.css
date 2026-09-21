@@ -1,0 +1,20 @@
+/* Token warna & radius sama persis dengan landing page (index.html root)
+   supaya portal terasa satu kesatuan visual. */
+:root {
+  --bg:          #0A0A0A;
+  --surface:     #141414;
+  --surface2:    #1C1C1C;
+  --border:      #2A2A2A;
+  --border-h:    rgba(200,240,75,.28);
+  --text:        #F2EDE6;
+  --muted:       #888880;
+  --accent:      #C8F04B;
+  --accent-dark: #9BBD30;
+  --wa:          #25D366;
+  --danger:      #F25555;
+  --warn:        #F3CC00;
+  --success:     #4ECDC4;
+  --r:           16px;
+  --r-xl:        24px;
+  --ease-out:    cubic-bezier(.22,1,.36,1);
+}
