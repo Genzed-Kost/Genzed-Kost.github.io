@@ -38,6 +38,11 @@ export default function Denda() {
     }
     setSubmitting(true);
     try {
+      // Aturan baru otomatis jadi satu-satunya yang aktif (kolom is_active default true),
+      // jadi aturan lain yang masih aktif WAJIB dinonaktifkan dulu — kalau nggak, mesin
+      // denda otomatis (yang query .eq("is_active", true).limit(1)) bisa ambil aturan
+      // yang salah / nggak konsisten sama yang keliatan di UI.
+      await Promise.all((penalties ?? []).filter((p) => p.is_active).map((p) => supabase.from("penalties").update({ is_active: false }).eq("id", p.id)));
       const { error: insertErr } = await supabase.from("penalties").insert({
         name: name.trim(),
         calc_type: calcType,
