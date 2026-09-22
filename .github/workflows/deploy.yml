@@ -17,6 +17,13 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Terikat ke environment yang sama dengan job deploy — kalau secret
+    # VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY disimpan sebagai "Environment
+    # secret" di environment "github-pages" (bukan "Repository secret"),
+    # job ini butuh baris ini supaya bisa mengaksesnya. Repository secret
+    # tetap kebaca normal dengan atau tanpa baris ini.
+    environment:
+      name: github-pages
     steps:
       - uses: actions/checkout@v4
 
