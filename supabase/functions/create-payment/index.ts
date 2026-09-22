@@ -258,6 +258,8 @@ Deno.serve(async (req) => {
 
     if (amountToPayExternally <= 0) {
       await confirmPayment(admin, payment.id);
+      payment.status = "LUNAS";
+      payment.paid_at = new Date().toISOString();
     }
 
     return jsonResponse({ ok: true, payment, ...extra });
