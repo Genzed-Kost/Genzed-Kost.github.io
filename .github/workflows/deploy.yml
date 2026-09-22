@@ -23,14 +23,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          # Tidak pakai cache: npm di sini karena portal/package-lock.json belum
-          # pernah di-generate (belum ada Node.js di mesin dev). Setelah lockfile
-          # ada & di-commit, boleh tambah lagi `cache: npm` + cache-dependency-path
-          # buat mempercepat build.
+          cache: npm
+          cache-dependency-path: portal/package-lock.json
 
       - name: Install dependency portal
         working-directory: portal
-        run: npm install
+        run: npm ci
 
       - name: Build portal (Vite)
         working-directory: portal

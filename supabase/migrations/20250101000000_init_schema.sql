@@ -7,7 +7,14 @@ create extension if not exists "pgcrypto";
 
 -- ────────────────────────────────────────────────────────────
 -- ENUM TYPES
+-- "drop type if exists" dulu di tiap enum supaya migrasi ini aman
+-- dijalankan ulang kalau percobaan sebelumnya sempat gagal di tengah jalan.
 -- ────────────────────────────────────────────────────────────
+drop type if exists public.user_role, public.tenancy_status, public.billing_cycle,
+  public.invoice_status, public.invoice_item_type, public.payment_method,
+  public.payment_status, public.ledger_entry_type, public.voucher_type,
+  public.penalty_calc_type, public.complaint_status, public.invite_status;
+
 create type public.user_role as enum ('penghuni', 'admin');
 create type public.tenancy_status as enum ('AKTIF', 'BERAKHIR', 'DIBATALKAN');
 create type public.billing_cycle as enum ('BULANAN', 'TRIWULAN', 'SEMESTER', 'TAHUNAN');
@@ -22,21 +29,9 @@ create type public.complaint_status as enum ('BARU', 'DIPROSES', 'SELESAI', 'DIT
 create type public.invite_status as enum ('MENUNGGU_AKTIVASI', 'OTP_TERKIRIM', 'AKTIF', 'KEDALUWARSA', 'DIBATALKAN');
 
 -- ────────────────────────────────────────────────────────────
--- HELPER: cek role admin tanpa memicu rekursi RLS
+-- HELPER (bagian 1): trigger updated_at — nggak butuh tabel apa pun,
+-- aman dibuat lebih awal.
 -- ────────────────────────────────────────────────────────────
-create or replace function public.is_admin()
-returns boolean
-language sql
-security definer
-set search_path = public
-stable
-as $$
-  select exists (
-    select 1 from public.profiles
-    where id = auth.uid() and role = 'admin'
-  );
-$$;
-
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -63,6 +58,26 @@ create table public.profiles (
 );
 create unique index profiles_phone_key on public.profiles(phone);
 create unique index profiles_email_key on public.profiles(email);
+
+-- ────────────────────────────────────────────────────────────
+-- HELPER (bagian 2): cek role admin tanpa memicu rekursi RLS.
+-- Fungsi ini LANGUAGE SQL, dan Postgres memvalidasi referensi tabel
+-- di dalamnya saat CREATE FUNCTION (beda dari plpgsql yang baru
+-- divalidasi saat dipanggil) — jadi WAJIB dibuat SETELAH public.profiles
+-- ada, bukan sebelumnya.
+-- ────────────────────────────────────────────────────────────
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'admin'
+  );
+$$;
 
 alter table public.profiles enable row level security;
 create policy "profiles_select_own_or_admin" on public.profiles

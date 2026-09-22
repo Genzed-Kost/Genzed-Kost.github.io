@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 import { formatRupiah, isEmail, isPhoneID } from "./format";
 
 describe("formatRupiah", () => {
+  // Intl.NumberFormat("id-ID", {style:"currency"}) menyisipkan NO-BREAK SPACE (U+00A0)
+  // antara "Rp" dan angkanya — ini perilaku standar formatter, bukan bug.
   it("format angka jadi Rupiah tanpa desimal", () => {
-    expect(formatRupiah(800000)).toBe("Rp800.000");
-    expect(formatRupiah(1000000)).toBe("Rp1.000.000");
-    expect(formatRupiah(0)).toBe("Rp0");
+    expect(formatRupiah(800000)).toBe("Rp 800.000");
+    expect(formatRupiah(1000000)).toBe("Rp 1.000.000");
+    expect(formatRupiah(0)).toBe("Rp 0");
   });
 });
 
