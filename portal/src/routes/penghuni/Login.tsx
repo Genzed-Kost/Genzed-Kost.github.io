@@ -41,12 +41,21 @@ export default function Login() {
         setError("Akun tidak ditemukan. Pastikan email/No HP benar, atau hubungi admin kost.");
         return;
       }
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) {
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+      if (signInError || !signInData.user) {
         setError("Email/No HP atau password salah.");
         return;
       }
-      navigate("/penghuni/dashboard");
+
+      // Arahkan sesuai role — admin ke /admin, penghuni ke dashboard-nya sendiri.
+      // Kalau langsung hardcode /penghuni/dashboard, akun admin bakal nyasar ke
+      // rute yang nolak dia (requireRole="penghuni") dan bikin halaman kosong.
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", signInData.user.id)
+        .single();
+      navigate(profile?.role === "admin" ? "/admin" : "/penghuni/dashboard");
     } catch {
       setError("Terjadi kesalahan. Coba lagi ya.");
     } finally {
