@@ -102,13 +102,20 @@ Deno.serve(async (req) => {
       if (exists) continue; // sudah pernah dibuat, jangan duplikat
 
       const fullPeriodRate = tenancy.monthly_rate * cycleMonths(cycle);
-      // Tagihan pertama dibandingkan terhadap panjang PENUH periode anchor yang
-      // menampung tanggal masuknya (bukan calculateSewaAmount biasa, yang nggak
-      // akan mendeteksi prorata sama sekali karena periodStart di sini SAMA
-      // dengan tenancyStart, bukan tanggal anchor).
-      const sewa = isFirstInvoice
-        ? calculateFirstPeriodSewaAmount(fullPeriodRate, tenancyStart, periodEnd, anchor)
-        : calculateSewaAmount(fullPeriodRate, periodStart, periodEnd, tenancyStart, tenancyEnd);
+      // Aturan bisnis Genzed Kost: tagihan PERTAMA seorang penghuni SELALU tarif
+      // penuh, nggak peduli masuk tanggal berapa dalam periode anchornya (cuma
+      // tanggal TERBIT tagihan yang beda, bukan nominalnya) — kecuali penghuni
+      // itu KEBETULAN juga udah dijadwalkan keluar (end_date) sebelum periode
+      // pertamanya berakhir, baru diprorata buat bagian yang ditempati aja.
+      let sewa: { amount: number; isProrated: boolean; occupiedDays: number; totalDays: number };
+      if (isFirstInvoice) {
+        sewa =
+          tenancyEnd && tenancyEnd < periodEndFull
+            ? calculateFirstPeriodSewaAmount(fullPeriodRate, tenancyStart, periodEnd, anchor)
+            : { amount: Math.round(fullPeriodRate), isProrated: false, occupiedDays: 0, totalDays: 0 };
+      } else {
+        sewa = calculateSewaAmount(fullPeriodRate, periodStart, periodEnd, tenancyStart, tenancyEnd);
+      }
 
       const monthKey = `${today.getUTCFullYear()}${String(today.getUTCMonth() + 1).padStart(2, "0")}`;
       const { count } = await admin
