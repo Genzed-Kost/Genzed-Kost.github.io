@@ -1,12 +1,28 @@
 // Dipanggil harian oleh pg_cron. Untuk tiap kontrak sewa aktif, cek apakah
 // sudah waktunya terbitkan tagihan periode berikutnya (dengan prorata otomatis
 // kalau penghuni baru masuk/mau keluar di tengah periode).
+//
+// Jadwal terbit tagihan (aturan bisnis Genzed Kost): penghuni yang mulai sewa
+// tanggal 1-15 masuk siklus anchor tanggal 1 (tagihan tiap periode terbit
+// tanggal 25 bulan sebelumnya); yang mulai tanggal 16-31 masuk siklus anchor
+// tanggal 16 (tagihan terbit tanggal 10 bulan yang sama). Tagihan PERTAMA
+// seorang penghuni selalu langsung terbit begitu kontrak dibuat (nggak nunggu
+// jadwal 25/10, yang buat penghuni yang baru daftar kemungkinan udah lewat).
 import { getSupabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { sendWhatsApp } from "../_shared/whatsapp.ts";
 import { jsonResponse } from "../_shared/cors.ts";
-import { calculateSewaAmount, computePeriodEnd, cycleMonths, formatInvoiceNumber, type BillingCycle } from "../_shared/billing.ts";
+import {
+  billingAnchorFromStartDate,
+  calculateFirstPeriodSewaAmount,
+  calculateSewaAmount,
+  cycleMonths,
+  firstAnchoredPeriodEnd,
+  formatInvoiceNumber,
+  invoicePublishDate,
+  nextAnchoredPeriodEnd,
+  type BillingCycle,
+} from "../_shared/billing.ts";
 
-const DEFAULT_LEAD_DAYS = 5;
 const DEFAULT_DUE_DAYS = 5;
 
 function jakartaToday(): Date {
@@ -33,13 +49,12 @@ Deno.serve(async (req) => {
   let createdCount = 0;
 
   try {
-    const { data: settingsRows } = await admin
+    const { data: dueSetting } = await admin
       .from("settings")
-      .select("key, value")
-      .in("key", ["invoice_lead_days", "invoice_due_days_after_period_start"]);
-    const settingsMap = new Map((settingsRows ?? []).map((r) => [r.key, r.value]));
-    const leadDays = Number(settingsMap.get("invoice_lead_days") ?? DEFAULT_LEAD_DAYS);
-    const dueDays = Number(settingsMap.get("invoice_due_days_after_period_start") ?? DEFAULT_DUE_DAYS);
+      .select("value")
+      .eq("key", "invoice_due_days_after_period_start")
+      .maybeSingle();
+    const dueDays = Number(dueSetting?.value ?? DEFAULT_DUE_DAYS);
 
     const { data: tenancies, error: tenErr } = await admin
       .from("tenancies")
@@ -48,6 +63,10 @@ Deno.serve(async (req) => {
     if (tenErr) return jsonResponse({ error: tenErr.message }, 500);
 
     for (const tenancy of tenancies ?? []) {
+      const tenancyStart = new Date(`${tenancy.start_date}T00:00:00.000Z`);
+      const anchor = billingAnchorFromStartDate(tenancyStart);
+      const cycle = tenancy.billing_cycle as BillingCycle;
+
       const { data: lastInvoice } = await admin
         .from("invoices")
         .select("period_end")
@@ -56,13 +75,22 @@ Deno.serve(async (req) => {
         .limit(1)
         .maybeSingle();
 
-      const periodStart = lastInvoice ? addDays(new Date(`${lastInvoice.period_end}T00:00:00.000Z`), 1) : new Date(`${tenancy.start_date}T00:00:00.000Z`);
+      const isFirstInvoice = !lastInvoice;
+      const periodStart = isFirstInvoice ? tenancyStart : addDays(new Date(`${lastInvoice.period_end}T00:00:00.000Z`), 1);
       const tenancyEnd = tenancy.end_date ? new Date(`${tenancy.end_date}T00:00:00.000Z`) : null;
 
       if (tenancyEnd && periodStart > tenancyEnd) continue; // kontrak sudah lunas sampai berakhir
-      if (periodStart > addDays(today, leadDays)) continue; // belum waktunya terbitkan
 
-      const periodEndFull = computePeriodEnd(periodStart, tenancy.billing_cycle as BillingCycle);
+      // Tagihan pertama langsung terbit begitu kontrak dibuat. Tagihan berikutnya
+      // nunggu jadwal terbit resmi (tanggal 25/10) sesuai anchor billing-nya.
+      if (!isFirstInvoice) {
+        const publishDate = invoicePublishDate(periodStart, anchor);
+        if (today < publishDate) continue; // belum waktunya terbitkan
+      }
+
+      const periodEndFull = isFirstInvoice
+        ? firstAnchoredPeriodEnd(tenancyStart, cycle, anchor)
+        : nextAnchoredPeriodEnd(periodStart, cycle, anchor);
       const periodEnd = tenancyEnd && tenancyEnd < periodEndFull ? tenancyEnd : periodEndFull;
 
       const { data: exists } = await admin
@@ -73,8 +101,14 @@ Deno.serve(async (req) => {
         .maybeSingle();
       if (exists) continue; // sudah pernah dibuat, jangan duplikat
 
-      const fullPeriodRate = tenancy.monthly_rate * cycleMonths(tenancy.billing_cycle as BillingCycle);
-      const sewa = calculateSewaAmount(fullPeriodRate, periodStart, periodEnd, new Date(`${tenancy.start_date}T00:00:00.000Z`), tenancyEnd);
+      const fullPeriodRate = tenancy.monthly_rate * cycleMonths(cycle);
+      // Tagihan pertama dibandingkan terhadap panjang PENUH periode anchor yang
+      // menampung tanggal masuknya (bukan calculateSewaAmount biasa, yang nggak
+      // akan mendeteksi prorata sama sekali karena periodStart di sini SAMA
+      // dengan tenancyStart, bukan tanggal anchor).
+      const sewa = isFirstInvoice
+        ? calculateFirstPeriodSewaAmount(fullPeriodRate, tenancyStart, periodEnd, anchor)
+        : calculateSewaAmount(fullPeriodRate, periodStart, periodEnd, tenancyStart, tenancyEnd);
 
       const monthKey = `${today.getUTCFullYear()}${String(today.getUTCMonth() + 1).padStart(2, "0")}`;
       const { count } = await admin
@@ -125,7 +159,7 @@ Deno.serve(async (req) => {
         action: "generate_invoice",
         target_table: "invoices",
         target_id: invoice.id,
-        metadata: { invoice_number: invoiceNumber, tenancy_id: tenancy.id, prorated: sewa.isProrated },
+        metadata: { invoice_number: invoiceNumber, tenancy_id: tenancy.id, prorated: sewa.isProrated, anchor, is_first_invoice: isFirstInvoice },
       });
 
       if (tenant) {

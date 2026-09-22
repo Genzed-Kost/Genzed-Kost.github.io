@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
   addMonthsClamped,
+  billingAnchorFromStartDate,
+  calculateFirstPeriodSewaAmount,
   calculatePenalty,
   calculateSewaAmount,
   computePeriodEnd,
+  firstAnchoredPeriodEnd,
   formatInvoiceNumber,
   inclusiveDayCount,
+  invoicePublishDate,
+  nextAnchoredPeriodEnd,
   overlapDays,
 } from "./billing";
 
@@ -126,5 +131,67 @@ describe("formatInvoiceNumber", () => {
   it("format INV-YYYYMM-XXXX", () => {
     expect(formatInvoiceNumber(d("2026-01-15"), 7)).toBe("INV-202601-0007");
     expect(formatInvoiceNumber(d("2026-11-01"), 123)).toBe("INV-202611-0123");
+  });
+});
+
+describe("billingAnchorFromStartDate", () => {
+  it("tanggal 1-15 -> anchor 1", () => {
+    expect(billingAnchorFromStartDate(d("2026-09-01"))).toBe(1);
+    expect(billingAnchorFromStartDate(d("2026-09-15"))).toBe(1);
+  });
+  it("tanggal 16-31 -> anchor 16", () => {
+    expect(billingAnchorFromStartDate(d("2026-09-16"))).toBe(16);
+    expect(billingAnchorFromStartDate(d("2026-09-30"))).toBe(16);
+  });
+});
+
+describe("firstAnchoredPeriodEnd", () => {
+  it("mulai tanggal 5 (anchor 1) -> periode pertama berakhir akhir bulan itu juga", () => {
+    expect(firstAnchoredPeriodEnd(d("2026-09-05"), "BULANAN", 1).toISOString().slice(0, 10)).toBe("2026-09-30");
+  });
+  it("mulai tanggal 22 (anchor 16) -> periode pertama berakhir tanggal 15 bulan depan", () => {
+    expect(firstAnchoredPeriodEnd(d("2026-09-22"), "BULANAN", 16).toISOString().slice(0, 10)).toBe("2026-10-15");
+  });
+  it("mulai persis tanggal 16 (anchor 16) -> tetap berakhir tanggal 15 bulan depan", () => {
+    expect(firstAnchoredPeriodEnd(d("2026-09-16"), "BULANAN", 16).toISOString().slice(0, 10)).toBe("2026-10-15");
+  });
+});
+
+describe("nextAnchoredPeriodEnd", () => {
+  it("periode anchor 1 bulanan: 1 Okt -> akhir Okt", () => {
+    expect(nextAnchoredPeriodEnd(d("2026-10-01"), "BULANAN", 1).toISOString().slice(0, 10)).toBe("2026-10-31");
+  });
+  it("periode anchor 16 bulanan: 16 Okt -> 15 Nov", () => {
+    expect(nextAnchoredPeriodEnd(d("2026-10-16"), "BULANAN", 16).toISOString().slice(0, 10)).toBe("2026-11-15");
+  });
+});
+
+describe("invoicePublishDate", () => {
+  it("anchor 1: terbit tanggal 25 bulan sebelumnya", () => {
+    expect(invoicePublishDate(d("2026-10-01"), 1).toISOString().slice(0, 10)).toBe("2026-09-25");
+  });
+  it("anchor 16: terbit tanggal 10 bulan yang sama", () => {
+    expect(invoicePublishDate(d("2026-09-16"), 16).toISOString().slice(0, 10)).toBe("2026-09-10");
+  });
+});
+
+describe("calculateFirstPeriodSewaAmount", () => {
+  it("masuk tanggal 22 (anchor 16, periode penuh 16..15 = 30 hari, terpakai 22..15 = 24 hari)", () => {
+    const r = calculateFirstPeriodSewaAmount(800000, d("2026-09-22"), d("2026-10-15"), 16);
+    expect(r.totalDays).toBe(30);
+    expect(r.occupiedDays).toBe(24);
+    expect(r.isProrated).toBe(true);
+    expect(r.amount).toBe(Math.round((800000 * 24) / 30));
+  });
+  it("masuk PERSIS tanggal anchor -> nggak diprorata, tarif penuh", () => {
+    const r = calculateFirstPeriodSewaAmount(800000, d("2026-09-16"), d("2026-10-15"), 16);
+    expect(r.isProrated).toBe(false);
+    expect(r.amount).toBe(800000);
+  });
+  it("anchor 1, masuk tanggal 5 -> prorata dari tanggal 1 sampai akhir bulan", () => {
+    const r = calculateFirstPeriodSewaAmount(1000000, d("2026-09-05"), d("2026-09-30"), 1);
+    expect(r.totalDays).toBe(30);
+    expect(r.occupiedDays).toBe(26);
+    expect(r.isProrated).toBe(true);
   });
 });

@@ -110,3 +110,77 @@ export function formatInvoiceNumber(date: Date, sequence: number): string {
   const yyyymm = `${date.getUTCFullYear()}${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
   return `INV-${yyyymm}-${String(sequence).padStart(4, "0")}`;
 }
+
+// ────────────────────────────────────────────────────────────
+// SIKLUS TAGIHAN "ANCHOR" — aturan bisnis Genzed Kost:
+// Penghuni yang mulai sewa tanggal 1-15 masuk siklus anchor tanggal 1
+// (tagihan tiap periode terbit tanggal 25 BULAN SEBELUMNYA).
+// Penghuni yang mulai sewa tanggal 16-31 masuk siklus anchor tanggal 16
+// (tagihan tiap periode terbit tanggal 10 di bulan yang sama).
+// Ini menormalkan semua penghuni ke salah satu dari 2 jadwal tagihan yang
+// konsisten & bisa diprediksi, bukan tanggal custom per orang.
+// ────────────────────────────────────────────────────────────
+
+export type BillingAnchor = 1 | 16;
+
+export function billingAnchorFromStartDate(startDate: Date): BillingAnchor {
+  return startDate.getUTCDate() <= 15 ? 1 : 16;
+}
+
+function setDate(date: Date, day: number): Date {
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), day));
+}
+
+// Tanggal mulai periode anchor yang MENAMPUNG suatu tanggal (dipakai buat nentuin
+// batas akhir periode pertama seorang penghuni, yang mulainya bisa di tengah periode anchor).
+export function containingAnchorStart(date: Date, anchor: BillingAnchor): Date {
+  if (anchor === 1) return setDate(date, 1);
+  return date.getUTCDate() >= 16 ? setDate(date, 16) : setDate(addMonthsClamped(date, -1), 16);
+}
+
+// Akhir periode PERTAMA seorang penghuni (period_start = tenancyStart asli, TIDAK
+// dimundurkan ke anchor — penghuni cuma dibebankan sejak hari dia benar-benar masuk).
+export function firstAnchoredPeriodEnd(tenancyStart: Date, cycle: BillingCycle, anchor: BillingAnchor): Date {
+  const anchorStart = containingAnchorStart(tenancyStart, anchor);
+  const nextAnchorStart = setDate(addMonthsClamped(anchorStart, cycleMonths(cycle)), anchor);
+  return new Date(nextAnchorStart.getTime() - 24 * 60 * 60 * 1000);
+}
+
+// Periode & akhir periode BERIKUTNYA (bukan yang pertama) — periodStart di sini
+// SELALU persis di tanggal anchor (1 atau 16), karena periode kedua dst selalu
+// mulai tepat sehari setelah periode sebelumnya berakhir di tanggal anchor.
+export function nextAnchoredPeriodEnd(periodStart: Date, cycle: BillingCycle, anchor: BillingAnchor): Date {
+  const nextAnchorStart = setDate(addMonthsClamped(periodStart, cycleMonths(cycle)), anchor);
+  return new Date(nextAnchorStart.getTime() - 24 * 60 * 60 * 1000);
+}
+
+// Kapan tagihan untuk periode yang mulai di `periodStart` (tanggal anchor) HARUS terbit.
+// anchor=1  -> tanggal 25 bulan sebelumnya
+// anchor=16 -> tanggal 10 bulan yang sama
+export function invoicePublishDate(periodStart: Date, anchor: BillingAnchor): Date {
+  if (anchor === 1) return setDate(addMonthsClamped(periodStart, -1), 25);
+  return setDate(periodStart, 10);
+}
+
+// Prorata KHUSUS tagihan pertama seorang penghuni: dibandingkan terhadap panjang
+// PENUH periode anchor yang menampung tanggal masuknya (mis. anchor 16 yang
+// menampung tanggal 22 = periode penuh 16..15-bulan-depan), bukan cuma
+// tenancyStart..tenancyEnd biasa — soalnya di sini period_start SUDAH SAMA DENGAN
+// tenancyStart (bukan tanggal anchor), jadi calculateSewaAmount biasa nggak akan
+// mendeteksi ada prorata sama sekali.
+export function calculateFirstPeriodSewaAmount(
+  rate: number,
+  tenancyStart: Date,
+  periodEnd: Date,
+  anchor: BillingAnchor
+): { amount: number; isProrated: boolean; occupiedDays: number; totalDays: number } {
+  const anchorStart = containingAnchorStart(tenancyStart, anchor);
+  const totalDays = inclusiveDayCount(anchorStart, periodEnd);
+  const occupiedDays = inclusiveDayCount(tenancyStart, periodEnd);
+
+  if (occupiedDays >= totalDays) {
+    return { amount: Math.round(rate), isProrated: false, occupiedDays, totalDays };
+  }
+  const amount = Math.round((rate * occupiedDays) / totalDays);
+  return { amount, isProrated: true, occupiedDays, totalDays };
+}
