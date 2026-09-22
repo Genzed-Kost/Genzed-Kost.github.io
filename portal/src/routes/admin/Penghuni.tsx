@@ -13,6 +13,7 @@ export default function Penghuni() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   async function load() {
     const { data, error: fetchErr } = await supabase
@@ -65,9 +66,35 @@ export default function Penghuni() {
     }
   }
 
-  async function toggleActive(profile: Profile) {
-    await supabase.from("profiles").update({ is_active: !profile.is_active }).eq("id", profile.id);
-    await load();
+  async function handleDelete(profile: Profile) {
+    const confirmed = confirm(
+      `Hapus akun ${profile.full_name} secara PERMANEN?\n\n` +
+        `⚠️ Ini juga menghapus SELURUH riwayat tagihan, pembayaran, kontrak, dan dokumennya — nggak bisa dibatalkan. ` +
+        `Kalau cuma mau kontrak sewanya berakhir (penghuni pindah), pakai "Akhiri" di menu Kontrak, jangan hapus akunnya.`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(profile.id);
+    setError(null);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const res = await fetch(functionsUrl("delete-tenant"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ profile_id: profile.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Gagal menghapus penghuni.");
+        return;
+      }
+      setSuccess(`Akun ${profile.full_name} berhasil dihapus.`);
+      await load();
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   return (
@@ -125,10 +152,11 @@ export default function Penghuni() {
               </div>
               <button
                 className="btn-link"
-                style={{ color: p.is_active ? "var(--danger)" : "var(--accent)" }}
-                onClick={() => toggleActive(p)}
+                style={{ color: "var(--danger)" }}
+                disabled={deletingId === p.id}
+                onClick={() => handleDelete(p)}
               >
-                {p.is_active ? "Nonaktifkan" : "Aktifkan"}
+                {deletingId === p.id ? "Menghapus..." : "🗑️ Hapus Penghuni"}
               </button>
             </Card>
           ))}
