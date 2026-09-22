@@ -17,13 +17,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Terikat ke environment yang sama dengan job deploy — kalau secret
-    # VITE_SUPABASE_URL/VITE_SUPABASE_ANON_KEY disimpan sebagai "Environment
-    # secret" di environment "github-pages" (bukan "Repository secret"),
-    # job ini butuh baris ini supaya bisa mengaksesnya. Repository secret
-    # tetap kebaca normal dengan atau tanpa baris ini.
-    environment:
-      name: github-pages
     steps:
       - uses: actions/checkout@v4
 
@@ -36,10 +29,6 @@ jobs:
       - name: Install dependency portal
         working-directory: portal
         run: npm ci
-
-      - name: Cek env var Supabase ke-set atau nggak (tanpa nampilin isinya)
-        run: |
-          echo "::notice title=Cek secrets/vars::secrets.URL_kosong=${{ secrets.VITE_SUPABASE_URL == '' }} vars.URL_kosong=${{ vars.VITE_SUPABASE_URL == '' }} secrets.KEY_kosong=${{ secrets.VITE_SUPABASE_ANON_KEY == '' }} vars.KEY_kosong=${{ vars.VITE_SUPABASE_ANON_KEY == '' }}"
 
       - name: Build portal (Vite)
         working-directory: portal
