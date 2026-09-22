@@ -20,6 +20,7 @@ import AdminPenghuni from "./routes/admin/Penghuni";
 import Kontrak from "./routes/admin/Kontrak";
 import Kamar from "./routes/admin/Kamar";
 import AdminKomplain from "./routes/admin/Komplain";
+import AdminDokumen from "./routes/admin/Dokumen";
 import AdminVoucher from "./routes/admin/Voucher";
 import Denda from "./routes/admin/Denda";
 import Pengaturan from "./routes/admin/Pengaturan";
@@ -61,6 +62,7 @@ export default function App() {
               <Route path="/admin/kontrak" element={<Kontrak />} />
               <Route path="/admin/kamar" element={<Kamar />} />
               <Route path="/admin/komplain" element={<AdminKomplain />} />
+              <Route path="/admin/dokumen" element={<AdminDokumen />} />
               <Route path="/admin/voucher" element={<AdminVoucher />} />
               <Route path="/admin/denda" element={<Denda />} />
               <Route path="/admin/pengaturan" element={<Pengaturan />} />
