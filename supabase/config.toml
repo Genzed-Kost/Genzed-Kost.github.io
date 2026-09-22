@@ -20,3 +20,28 @@ additional_redirect_urls = ["https://genzed-kost.github.io"]
 
 [edge_runtime]
 enabled = true
+
+# Fungsi yang dipanggil TANPA sesi login penghuni/admin (sebelum login,
+# oleh Midtrans, atau oleh pg_cron) harus verify_jwt = false — kalau tidak,
+# platform Supabase nolak requestnya duluan sebelum sampai ke kode function
+# (karena nggak ada Authorization header berisi JWT user yang valid).
+# Fungsi lain (dipanggil penghuni/admin yang sudah login) TETAP verify_jwt
+# default (true) — otentikasi tambahan dicek manual di dalam kode function.
+[functions.verify-invite]
+verify_jwt = false
+[functions.verify-otp-activate]
+verify_jwt = false
+[functions.resolve-identifier]
+verify_jwt = false
+[functions.resolve-payment-link]
+verify_jwt = false
+[functions.midtrans-webhook]
+verify_jwt = false
+[functions.send-due-reminders]
+verify_jwt = false
+[functions.generate-monthly-invoices]
+verify_jwt = false
+[functions.apply-late-penalties]
+verify_jwt = false
+[functions.expire-stale-payments]
+verify_jwt = false
