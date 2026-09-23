@@ -213,9 +213,15 @@ Deno.serve(async (req) => {
       adminFee = calculateAdminFee(amountToPayExternally, fees.gateway);
       const grossCharge = amountToPayExternally + (borneBy === "tenant" ? adminFee : 0);
 
+      const itemName =
+        invoices.length === 1
+          ? `Tagihan Kost ${invoices[0].invoice_number}`
+          : `Tagihan Kost (${invoices.length} tagihan)`;
+
       const gateway = await createGatewayTransaction({
         orderId: paymentNumber,
         grossAmount: grossCharge,
+        itemName,
         customerName: tenant.full_name,
         customerEmail: tenant.email,
         customerPhone: tenant.phone,

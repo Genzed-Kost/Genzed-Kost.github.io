@@ -16,6 +16,7 @@ function authHeader(): string {
 export async function createGatewayTransaction(params: {
   orderId: string;
   grossAmount: number;
+  itemName: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
@@ -33,6 +34,17 @@ export async function createGatewayTransaction(params: {
         order_id: params.orderId,
         gross_amount: Math.round(params.grossAmount),
       },
+      // Tanpa item_details, Snap kadang nampilin nama produk default dari
+      // akun merchant (bukan generik/kosong) — bikin bingung penghuni pas
+      // checkout. Kirim eksplisit biar selalu jelas ini bayar apa.
+      item_details: [
+        {
+          id: params.orderId,
+          price: Math.round(params.grossAmount),
+          quantity: 1,
+          name: params.itemName.slice(0, 50),
+        },
+      ],
       customer_details: {
         first_name: params.customerName,
         email: params.customerEmail,
