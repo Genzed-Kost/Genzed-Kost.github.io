@@ -9,6 +9,8 @@ export default function Voucher() {
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [code, setCode] = useState("");
   const [type, setType] = useState<"NOMINAL" | "PERSEN">("NOMINAL");
@@ -31,7 +33,31 @@ export default function Voucher() {
     load();
   }, []);
 
-  async function handleCreate(e: FormEvent) {
+  function resetForm() {
+    setCode("");
+    setType("NOMINAL");
+    setValue("");
+    setMaxDiscount("");
+    setMinTransaction("0");
+    setQuota("");
+    setValidUntil("");
+    setEditingId(null);
+    setShowForm(false);
+  }
+
+  function startEdit(v: VoucherType) {
+    setEditingId(v.id);
+    setCode(v.code);
+    setType(v.voucher_type);
+    setValue(String(v.value));
+    setMaxDiscount(v.max_discount != null ? String(v.max_discount) : "");
+    setMinTransaction(String(v.min_transaction));
+    setQuota(v.quota != null ? String(v.quota) : "");
+    setValidUntil(v.valid_until.slice(0, 10));
+    setShowForm(true);
+  }
+
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
     if (!code.trim() || !value || !validUntil) {
@@ -40,7 +66,7 @@ export default function Voucher() {
     }
     setSubmitting(true);
     try {
-      const { error: insertErr } = await supabase.from("vouchers").insert({
+      const payload = {
         code: code.trim().toUpperCase(),
         voucher_type: type,
         value: Number(value),
@@ -48,18 +74,15 @@ export default function Voucher() {
         min_transaction: Number(minTransaction || 0),
         quota: quota ? Number(quota) : null,
         valid_until: new Date(validUntil).toISOString(),
-      });
-      if (insertErr) {
-        setError("Gagal membuat voucher: " + insertErr.message);
+      };
+      const { error: writeErr } = editingId
+        ? await supabase.from("vouchers").update(payload).eq("id", editingId)
+        : await supabase.from("vouchers").insert(payload);
+      if (writeErr) {
+        setError(`Gagal ${editingId ? "menyimpan perubahan" : "membuat voucher"}: ${writeErr.message}`);
         return;
       }
-      setCode("");
-      setValue("");
-      setMaxDiscount("");
-      setMinTransaction("0");
-      setQuota("");
-      setValidUntil("");
-      setShowForm(false);
+      resetForm();
       await load();
     } finally {
       setSubmitting(false);
@@ -71,11 +94,32 @@ export default function Voucher() {
     await load();
   }
 
+  async function handleDelete(v: VoucherType) {
+    if (!confirm(`Hapus voucher ${v.code} secara permanen? Riwayat pemakaiannya juga ikut terhapus.`)) return;
+    setDeletingId(v.id);
+    setError(null);
+    try {
+      const { error: deleteErr } = await supabase.from("vouchers").delete().eq("id", v.id);
+      if (deleteErr) {
+        setError("Gagal menghapus voucher: " + deleteErr.message);
+        return;
+      }
+      if (editingId === v.id) resetForm();
+      await load();
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div className="container" style={{ paddingTop: 32, paddingBottom: 48 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, flexWrap: "wrap", gap: 10 }}>
         <h1 style={{ fontSize: "1.5rem" }}>Voucher & Diskon</h1>
-        <button className="btn btn-primary" style={{ width: "auto" }} onClick={() => setShowForm((v) => !v)}>
+        <button
+          className="btn btn-primary"
+          style={{ width: "auto" }}
+          onClick={() => (showForm ? resetForm() : setShowForm(true))}
+        >
           {showForm ? "Batal" : "+ Voucher Baru"}
         </button>
       </div>
@@ -85,7 +129,8 @@ export default function Voucher() {
 
       {showForm && (
         <Card style={{ marginBottom: 20 }}>
-          <form onSubmit={handleCreate}>
+          <h3 style={{ fontSize: ".95rem", marginBottom: 14 }}>{editingId ? `Edit Voucher — ${code}` : "Voucher Baru"}</h3>
+          <form onSubmit={handleSubmit}>
             <div className="field">
               <label htmlFor="code">Kode Voucher</label>
               <input id="code" value={code} onChange={(e) => setCode(e.target.value)} placeholder="mis. HEMAT50" />
@@ -125,7 +170,7 @@ export default function Voucher() {
               <input id="validUntil" type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />
             </div>
             <button className="btn btn-primary" type="submit" disabled={submitting} style={{ width: "auto" }}>
-              {submitting ? <span className="spinner" /> : "Buat Voucher"}
+              {submitting ? <span className="spinner" /> : editingId ? "Simpan Perubahan" : "Buat Voucher"}
             </button>
           </form>
         </Card>
@@ -148,9 +193,22 @@ export default function Voucher() {
                   {v.quota ? `/${v.quota}` : ""} · sampai {formatTanggalWIB(v.valid_until).split(",")[0]}
                 </div>
               </div>
-              <button className="btn-link" style={{ color: v.is_active ? "var(--danger)" : "var(--accent)" }} onClick={() => toggleActive(v)}>
-                {v.is_active ? "Nonaktifkan" : "Aktifkan"}
-              </button>
+              <div style={{ display: "flex", gap: 14, alignItems: "center", flexWrap: "wrap" }}>
+                <button className="btn-link" onClick={() => startEdit(v)}>
+                  Edit
+                </button>
+                <button className="btn-link" style={{ color: v.is_active ? "var(--danger)" : "var(--accent)" }} onClick={() => toggleActive(v)}>
+                  {v.is_active ? "Nonaktifkan" : "Aktifkan"}
+                </button>
+                <button
+                  className="btn-link"
+                  style={{ color: "var(--danger)" }}
+                  disabled={deletingId === v.id}
+                  onClick={() => handleDelete(v)}
+                >
+                  {deletingId === v.id ? "Menghapus..." : "Hapus"}
+                </button>
+              </div>
             </Card>
           ))}
         </div>
