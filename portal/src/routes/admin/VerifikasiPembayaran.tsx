@@ -97,7 +97,7 @@ export default function VerifikasiPembayaran() {
                       {p.tenant?.full_name} · {p.tenant?.phone}
                     </div>
                     <div style={{ fontSize: ".78rem", color: "var(--muted)" }}>Diajukan {formatTanggalWIB(p.created_at)}</div>
-                    <div style={{ marginTop: 10, fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.2rem" }}>
+                    <div style={{ marginTop: 10, fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1.2rem" }}>
                       {formatRupiah(grossTransfer)}
                     </div>
                     <div style={{ fontSize: ".78rem", color: "var(--muted)" }}>

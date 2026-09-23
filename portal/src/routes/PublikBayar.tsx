@@ -76,7 +76,7 @@ export default function PublikBayar() {
               <>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
                   <span style={{ color: "var(--muted)", fontSize: ".85rem" }}>Total Transfer</span>
-                  <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.2rem" }}>
+                  <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1.2rem" }}>
                     {formatRupiah(data.total_to_transfer)}
                   </span>
                 </div>

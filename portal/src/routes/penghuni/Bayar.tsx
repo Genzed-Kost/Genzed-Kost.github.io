@@ -232,7 +232,7 @@ export default function Bayar() {
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
             <span style={{ color: "var(--muted)", fontSize: ".85rem" }}>Total Transfer</span>
-            <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.1rem" }}>
+            <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1.1rem" }}>
               {formatRupiah(result.total_to_transfer ?? 0)}
             </span>
           </div>

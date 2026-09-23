@@ -121,7 +121,7 @@ export default function Dashboard() {
               <div style={{ fontSize: ".75rem", color: "var(--accent)", fontWeight: 600, marginBottom: 4 }}>
                 KAMAR {tenancy.room.room_number}
               </div>
-              <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.2rem" }}>
+              <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1.2rem" }}>
                 {tenancy.room.room_type.name}
               </div>
               <div style={{ color: "var(--muted)", fontSize: ".85rem", marginTop: 4 }}>

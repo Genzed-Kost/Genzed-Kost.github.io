@@ -22,7 +22,7 @@ export function StatCard({ label, value, hint }: { label: string; value: ReactNo
       <div style={{ fontSize: ".75rem", color: "var(--muted)", marginBottom: 8, textTransform: "uppercase", letterSpacing: ".05em" }}>
         {label}
       </div>
-      <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.5rem", marginBottom: hint ? 4 : 0 }}>
+      <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1.5rem", marginBottom: hint ? 4 : 0 }}>
         {value}
       </div>
       {hint && <div style={{ fontSize: ".78rem", color: "var(--muted)" }}>{hint}</div>}

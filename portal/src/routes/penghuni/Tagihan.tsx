@@ -121,7 +121,7 @@ export default function Tagihan() {
                       </div>
                     </div>
                     <div style={{ textAlign: "right", flexShrink: 0 }}>
-                      <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.05rem" }}>
+                      <div style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1.05rem" }}>
                         {formatRupiah(sisa > 0 ? sisa : Number(inv.total))}
                       </div>
                       <div style={{ fontSize: ".78rem", fontWeight: 700, color: STATUS_COLOR[inv.status] }}>
