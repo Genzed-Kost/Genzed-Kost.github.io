@@ -12,6 +12,7 @@ const ACTION_LABEL: Record<string, string> = {
   submit_payment_proof: "Upload bukti transfer",
   approve_payment: "Setujui pembayaran",
   reject_payment: "Tolak pembayaran",
+  delete_tenant: "Hapus penghuni",
 };
 
 export default function AuditLog() {
