@@ -6,9 +6,13 @@ import { Card, EmptyState, StatCard } from "../../components/Card";
 type MonthIncome = { label: string; total: number };
 type Tunggakan = { invoice_number: string; due_date: string; outstanding: number; tenant_name: string };
 
+function csvField(value: string): string {
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
 function toCsv(rows: Tunggakan[]): string {
   const header = "No Invoice,Penghuni,Jatuh Tempo,Tunggakan\n";
-  const body = rows.map((r) => `${r.invoice_number},"${r.tenant_name}",${r.due_date},${r.outstanding}`).join("\n");
+  const body = rows.map((r) => `${csvField(r.invoice_number)},${csvField(r.tenant_name)},${r.due_date},${r.outstanding}`).join("\n");
   return header + body;
 }
 
