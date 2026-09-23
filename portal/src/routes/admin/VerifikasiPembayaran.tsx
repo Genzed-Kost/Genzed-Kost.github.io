@@ -15,7 +15,7 @@ export default function VerifikasiPembayaran() {
     const { data, error: fetchErr } = await supabase
       .from("payments")
       .select(
-        "id, payment_number, method, amount, admin_fee, unique_code, deposit_used, voucher_discount, status, created_at, tenant:profiles(full_name, phone), payment_proofs(id, file_path, uploaded_at)"
+        "id, payment_number, method, amount, admin_fee, unique_code, deposit_used, voucher_discount, status, created_at, tenant:profiles!payments_tenant_id_fkey(full_name, phone), payment_proofs(id, file_path, uploaded_at)"
       )
       .eq("status", "MENUNGGU_VERIFIKASI")
       .order("created_at", { ascending: true });
