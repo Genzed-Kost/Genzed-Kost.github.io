@@ -190,9 +190,9 @@ nav {
 nav.scrolled { background: rgba(10,10,10,.97); box-shadow: 0 1px 0 var(--border); }
 .nav-logo {
   display: flex; align-items: center; gap: 9px;
-  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-family: 'Syne', sans-serif; font-weight: 700;
   font-size: clamp(1.25rem, 2vw, 1.5rem);
-  letter-spacing: -.035em; color: var(--text); text-decoration: none;
+  letter-spacing: -.015em; color: var(--text); text-decoration: none;
 }
 .nav-logo-img {
   width: 32px; height: 32px;
@@ -273,7 +273,7 @@ nav.scrolled { background: rgba(10,10,10,.97); box-shadow: 0 1px 0 var(--border)
 }
 .mobile-menu.open { opacity: 1; pointer-events: all; }
 .mobile-menu a {
-  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-family: 'Syne', sans-serif; font-weight: 700;
   font-size: clamp(1.6rem, 6vw, 2.2rem);
   color: var(--text); text-decoration: none;
   transition: color .2s;
@@ -321,9 +321,10 @@ nav.scrolled { background: rgba(10,10,10,.97); box-shadow: 0 1px 0 var(--border)
 @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.45;transform:scale(1.5)} }
 
 .hero-title {
-  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-family: 'Syne', sans-serif; font-weight: 700;
   font-size: clamp(2.5rem, 4.8vw, 5.2rem);
-  line-height: 1.0; letter-spacing: -.045em; margin-bottom: 18px;
+  line-height: 1.08; letter-spacing: -.015em; margin-bottom: 18px;
+  text-shadow: 0 3px 20px rgba(0,0,0,.4);
 }
 .hero-title .line-accent { color: var(--accent); }
 .hero-location {
@@ -342,8 +343,8 @@ nav.scrolled { background: rgba(10,10,10,.97); box-shadow: 0 1px 0 var(--border)
   padding-top: 32px; border-top: 1px solid var(--border);
 }
 .stat-item .num {
-  font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 800;
-  color: var(--text); line-height: 1; margin-bottom: 4px; letter-spacing: -.04em;
+  font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 700;
+  color: var(--text); line-height: 1; margin-bottom: 4px; letter-spacing: -.015em;
 }
 .stat-item .num span { color: var(--accent); }
 .stat-item .label { font-size: .75rem; color: var(--muted); letter-spacing: .01em; }
@@ -438,9 +439,10 @@ section { padding: clamp(64px, 10vw, 96px) 5vw; }
   text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
 }
 .section-title {
-  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-family: 'Syne', sans-serif; font-weight: 700;
   font-size: clamp(1.8rem, 3.2vw, 2.8rem);
-  letter-spacing: -.04em; line-height: 1.08; margin-bottom: 12px;
+  letter-spacing: -.015em; line-height: 1.15; margin-bottom: 12px;
+  text-shadow: 0 2px 14px rgba(0,0,0,.35);
 }
 .section-sub { color: var(--muted); font-size: .97rem; max-width: 480px; line-height: 1.7; }
 .section-header {
@@ -509,9 +511,10 @@ section { padding: clamp(64px, 10vw, 96px) 5vw; }
   padding: 5px 12px; border-radius: 100px; margin-bottom: 18px;
 }
 .upgrade-title {
-  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-family: 'Syne', sans-serif; font-weight: 700;
   font-size: clamp(1.7rem, 3vw, 2.7rem);
-  letter-spacing: -.045em; line-height: 1.08; margin-bottom: 18px;
+  letter-spacing: -.015em; line-height: 1.15; margin-bottom: 18px;
+  text-shadow: 0 2px 14px rgba(0,0,0,.35);
 }
 .upgrade-body { color: var(--muted); font-size: .95rem; line-height: 1.78; margin-bottom: 24px; }
 .upgrade-perks { display: flex; flex-direction: column; gap: 9px; margin-bottom: 30px; }
@@ -673,7 +676,7 @@ section { padding: clamp(64px, 10vw, 96px) 5vw; }
 .author-avatar {
   width: 38px; height: 38px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-family: 'Syne', sans-serif; font-weight: 700;
   font-size: .82rem; color: #0A0A0A; flex-shrink: 0;
 }
 .author-name { font-weight: 600; font-size: .87rem; }
@@ -708,14 +711,14 @@ section { padding: clamp(64px, 10vw, 96px) 5vw; }
   letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
 }
 .card-name {
-  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-family: 'Syne', sans-serif; font-weight: 700;
   font-size: clamp(1.2rem,2vw,1.5rem); margin-bottom: 16px;
 }
 .price-orig { font-size: .95rem; color: var(--muted); text-decoration: line-through; margin-bottom: 4px; }
 .price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
 .price-val {
-  font-family: 'Syne', sans-serif; font-weight: 800;
-  font-size: clamp(2rem,3.5vw,2.6rem); color: var(--text); letter-spacing: -.04em;
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: clamp(2rem,3.5vw,2.6rem); color: var(--text); letter-spacing: -.015em;
 }
 .price-val span { font-size: 1.1rem; vertical-align: super; }
 .price-period { color: var(--muted); font-size: .85rem; }
@@ -770,8 +773,8 @@ footer {
   gap: clamp(28px,5vw,52px); margin-bottom: 40px;
 }
 .footer-brand .logo {
-  font-family: 'Syne', sans-serif; font-weight: 800;
-  font-size: clamp(1.2rem,2vw,1.5rem); letter-spacing: -.035em; margin-bottom: 12px;
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: clamp(1.2rem,2vw,1.5rem); letter-spacing: -.015em; margin-bottom: 12px;
 }
 .footer-brand .logo span { color: var(--accent); }
 .footer-brand p { font-size: .84rem; color: var(--muted); line-height: 1.7; max-width: 240px; margin-bottom: 18px; }
