@@ -17,7 +17,7 @@ if (missingEnv) {
   root.render(
     <div style={{ display: "grid", placeItems: "center", minHeight: "100svh", padding: "40px 5vw", textAlign: "center" }}>
       <div style={{ maxWidth: 420 }}>
-        <h1 style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.4rem", marginBottom: 12 }}>
+        <h1 style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1.4rem", marginBottom: 12 }}>
           Portal Belum Dikonfigurasi
         </h1>
         <p style={{ color: "#888880", fontSize: ".9rem" }}>

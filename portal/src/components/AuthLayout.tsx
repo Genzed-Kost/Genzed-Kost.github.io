@@ -6,7 +6,7 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
       <div style={{ width: "100%", maxWidth: 380 }}>
         <a href="/" style={{ display: "flex", alignItems: "center", gap: 9, marginBottom: 32, textDecoration: "none" }}>
           <img src="/logo.png" alt="" width={32} height={32} style={{ borderRadius: "50%" }} />
-          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.3rem" }}>
+          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1.3rem" }}>
             Genz<span style={{ color: "var(--accent)" }}>ed</span>
           </span>
         </a>

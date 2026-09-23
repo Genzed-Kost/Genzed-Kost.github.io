@@ -48,7 +48,7 @@ export function AdminLayout() {
       >
         <a href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none", marginBottom: 24, padding: "0 8px" }}>
           <img src="/logo.png" alt="" width={26} height={26} style={{ borderRadius: "50%" }} />
-          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1rem" }}>
+          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1rem" }}>
             Genz<span style={{ color: "var(--accent)" }}>ed</span> <span style={{ color: "var(--muted)", fontWeight: 600 }}>Admin</span>
           </span>
         </a>
@@ -94,7 +94,7 @@ export function AdminLayout() {
             zIndex: 10,
           }}
         >
-          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 800 }}>Admin</span>
+          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 700 }}>Admin</span>
           <button className="btn-link" onClick={() => setMenuOpen((v) => !v)}>
             {menuOpen ? "✕ Tutup" : "☰ Menu"}
           </button>

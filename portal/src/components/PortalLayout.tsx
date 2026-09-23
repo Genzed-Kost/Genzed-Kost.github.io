@@ -42,7 +42,7 @@ export function PortalLayout() {
       >
         <a href="/" style={{ display: "flex", alignItems: "center", gap: 9, textDecoration: "none", marginBottom: 28, padding: "0 8px" }}>
           <img src="/logo.png" alt="" width={28} height={28} style={{ borderRadius: "50%" }} />
-          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 800, fontSize: "1.1rem" }}>
+          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 700, fontSize: "1.1rem" }}>
             Genz<span style={{ color: "var(--accent)" }}>ed</span>
           </span>
         </a>
@@ -91,7 +91,7 @@ export function PortalLayout() {
             zIndex: 10,
           }}
         >
-          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 800 }}>
+          <span style={{ fontFamily: "Syne, sans-serif", fontWeight: 700 }}>
             Genz<span style={{ color: "var(--accent)" }}>ed</span>
           </span>
           <button className="btn-link" onClick={() => setMenuOpen((v) => !v)}>
