@@ -27,10 +27,23 @@ Deno.serve(async (req) => {
     if (!target) return jsonResponse({ error: "Penghuni tidak ditemukan." }, 404);
     if (target.role !== "penghuni") return jsonResponse({ error: "Cuma bisa hapus akun dengan role penghuni." }, 400);
 
+    // Catat kamar yang lagi ditempati SEBELUM tenancy-nya ikut kehapus lewat cascade,
+    // biar bisa dibebaskan lagi (is_occupied=false) setelah akunnya beneran hilang.
+    const { data: activeTenancies } = await admin
+      .from("tenancies")
+      .select("room_id")
+      .eq("tenant_id", profile_id)
+      .eq("status", "AKTIF");
+    const roomIds = [...new Set((activeTenancies ?? []).map((t) => t.room_id))];
+
     // Menghapus dari auth.users otomatis cascade ke profiles + semua tabel
     // turunannya (tenancies, invoices, payments, dst) lewat FK ON DELETE CASCADE.
     const { error: deleteErr } = await admin.auth.admin.deleteUser(profile_id);
     if (deleteErr) return jsonResponse({ error: deleteErr.message }, 500);
+
+    if (roomIds.length > 0) {
+      await admin.from("rooms").update({ is_occupied: false }).in("id", roomIds);
+    }
 
     await admin.from("audit_logs").insert({
       actor_id: caller.user.id,
