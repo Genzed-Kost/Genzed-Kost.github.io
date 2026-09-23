@@ -43,8 +43,9 @@ export default function Dashboard() {
           supabase.from("deposits").select("remaining_amount").eq("tenant_id", profile!.id),
           supabase
             .from("vouchers")
-            .select("id", { count: "exact", head: true })
+            .select("id, quota, used_count")
             .eq("is_active", true)
+            .lte("valid_from", new Date().toISOString())
             .gte("valid_until", new Date().toISOString()),
           supabase
             .from("notifications")
@@ -65,12 +66,13 @@ export default function Dashboard() {
         }
 
         const depositTotal = (depositsRes.data ?? []).reduce((sum, d) => sum + Number(d.remaining_amount), 0);
+        const voucherCount = (vouchersRes.data ?? []).filter((v) => v.quota == null || v.used_count < v.quota).length;
 
         setData({
           tenancy: tenancyRes.data as unknown as Tenancy | null,
           activeInvoices: (invoicesRes.data ?? []) as Invoice[],
           depositTotal,
-          voucherCount: vouchersRes.count ?? 0,
+          voucherCount,
           reminders: (notifRes.data ?? []) as NotificationRow[],
         });
       } catch {
