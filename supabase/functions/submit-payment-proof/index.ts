@@ -61,9 +61,12 @@ Deno.serve(async (req) => {
       const total = Number(payment.amount) + Number(payment.admin_fee ?? 0);
       const message = `Halo Admin! 👋\n\nPenghuni *${tenant?.full_name ?? "-"}* baru saja upload bukti transfer untuk pembayaran ${payment.payment_number} sebesar ${rupiah(total)}.\n\nYuk cek dan verifikasi di halaman Verifikasi Pembayaran.`;
 
-      await Promise.allSettled((admins ?? []).map((a) => sendWhatsApp(a.phone, message)));
-    } catch {
-      // notifikasi gagal tidak menggagalkan submit bukti transfer
+      const results = await Promise.allSettled((admins ?? []).map((a) => sendWhatsApp(a.phone, message)));
+      for (const r of results) {
+        if (r.status === "rejected") console.error("Gagal kirim WA notif admin:", r.reason);
+      }
+    } catch (err) {
+      console.error("Gagal proses notif WA admin:", err);
     }
 
     await admin.from("audit_logs").insert({
