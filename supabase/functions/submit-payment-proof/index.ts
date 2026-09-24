@@ -5,7 +5,7 @@
 // tabel keuangan, jadi transisi status terkontrol ini butuh service role.
 import { getSupabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
-import { sendWhatsApp, normalizePhone } from "../_shared/whatsapp.ts";
+import { sendWhatsApp } from "../_shared/whatsapp.ts";
 
 function rupiah(n: number): string {
   return "Rp" + Math.round(n).toLocaleString("id-ID");
@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
     await admin.from("payments").update({ status: "MENUNGGU_VERIFIKASI" }).eq("id", payment.id);
 
     try {
-      const { data: tenant } = await admin.from("profiles").select("full_name, phone").eq("id", caller.user.id).single();
+      const { data: tenant } = await admin.from("profiles").select("full_name").eq("id", caller.user.id).single();
       const { data: admins } = await admin
         .from("profiles")
         .select("phone")
@@ -59,8 +59,9 @@ Deno.serve(async (req) => {
         .eq("is_active", true);
 
       const total = Number(payment.amount) + Number(payment.admin_fee ?? 0);
-      const waLink = tenant?.phone ? `https://wa.me/${normalizePhone(tenant.phone)}` : null;
-      const message = `Halo Admin! 👋\n\nPenghuni *${tenant?.full_name ?? "-"}* baru saja upload bukti transfer untuk pembayaran ${payment.payment_number} sebesar ${rupiah(total)}.${waLink ? `\nChat penghuni: ${waLink}` : ""}\n\nYuk cek dan verifikasi di halaman Verifikasi Pembayaran.`;
+      const appUrl = Deno.env.get("APP_BASE_URL") ?? "https://genzed-kost.github.io";
+      const verifyLink = `${appUrl}/admin/verifikasi`;
+      const message = `Halo Admin! 👋\n\nPenghuni *${tenant?.full_name ?? "-"}* baru saja upload bukti transfer untuk pembayaran ${payment.payment_number} sebesar ${rupiah(total)}.\n\nCek dan verifikasi di: ${verifyLink}`;
 
       const results = await Promise.allSettled((admins ?? []).map((a) => sendWhatsApp(a.phone, message)));
       for (const r of results) {

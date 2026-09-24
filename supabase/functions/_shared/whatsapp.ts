@@ -22,7 +22,7 @@ async function sendViaFonnte(phone: string, message: string): Promise<void> {
   }
 }
 
-export function normalizePhone(phone: string): string {
+function normalizePhone(phone: string): string {
   let p = phone.trim().replace(/[^\d+]/g, "");
   if (p.startsWith("0")) p = "62" + p.slice(1);
   if (p.startsWith("+")) p = p.slice(1);
