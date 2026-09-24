@@ -5,6 +5,11 @@
 // tabel keuangan, jadi transisi status terkontrol ini butuh service role.
 import { getSupabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { handleOptions, jsonResponse } from "../_shared/cors.ts";
+import { sendWhatsApp } from "../_shared/whatsapp.ts";
+
+function rupiah(n: number): string {
+  return "Rp" + Math.round(n).toLocaleString("id-ID");
+}
 
 Deno.serve(async (req) => {
   const opt = handleOptions(req);
@@ -21,7 +26,7 @@ Deno.serve(async (req) => {
 
     const { data: payment } = await admin
       .from("payments")
-      .select("id, tenant_id, status, method")
+      .select("id, tenant_id, status, method, payment_number, amount, admin_fee")
       .eq("id", payment_id)
       .maybeSingle();
     if (!payment || payment.tenant_id !== caller.user.id) {
@@ -44,6 +49,22 @@ Deno.serve(async (req) => {
     });
 
     await admin.from("payments").update({ status: "MENUNGGU_VERIFIKASI" }).eq("id", payment.id);
+
+    try {
+      const { data: tenant } = await admin.from("profiles").select("full_name").eq("id", caller.user.id).single();
+      const { data: admins } = await admin
+        .from("profiles")
+        .select("phone")
+        .eq("role", "admin")
+        .eq("is_active", true);
+
+      const total = Number(payment.amount) + Number(payment.admin_fee ?? 0);
+      const message = `Halo Admin! 👋\n\nPenghuni *${tenant?.full_name ?? "-"}* baru saja upload bukti transfer untuk pembayaran ${payment.payment_number} sebesar ${rupiah(total)}.\n\nYuk cek dan verifikasi di halaman Verifikasi Pembayaran.`;
+
+      await Promise.allSettled((admins ?? []).map((a) => sendWhatsApp(a.phone, message)));
+    } catch {
+      // notifikasi gagal tidak menggagalkan submit bukti transfer
+    }
 
     await admin.from("audit_logs").insert({
       actor_id: caller.user.id,
