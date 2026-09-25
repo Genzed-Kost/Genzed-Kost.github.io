@@ -13,6 +13,11 @@ const ACTION_LABEL: Record<string, string> = {
   approve_payment: "Setujui pembayaran",
   reject_payment: "Tolak pembayaran",
   delete_tenant: "Hapus penghuni",
+  create_payment_account: "Tambah rekening",
+  update_payment_account: "Ubah rekening",
+  activate_payment_account: "Aktifkan rekening",
+  deactivate_payment_account: "Nonaktifkan rekening",
+  delete_payment_account: "Hapus rekening",
 };
 
 export default function AuditLog() {

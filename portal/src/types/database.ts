@@ -110,6 +110,7 @@ export type PaymentProof = {
   id: string;
   file_path: string;
   uploaded_at: string;
+  payment_account: { account_type: PaymentAccountType; bank_name: string | null; account_number: string | null; ewallet_provider: string | null } | null;
 };
 
 export type PaymentForReview = {
@@ -145,6 +146,22 @@ export type Complaint = {
   status: "BARU" | "DIPROSES" | "SELESAI" | "DITOLAK";
   admin_response: string | null;
   created_at: string;
+};
+
+export type PaymentAccountType = "BANK" | "QRIS" | "EWALLET";
+
+export type PaymentAccount = {
+  id: string;
+  account_type: PaymentAccountType;
+  bank_code: string | null;
+  bank_name: string | null;
+  account_number: string | null;
+  account_holder: string | null;
+  qris_image_path: string | null;
+  ewallet_provider: string | null;
+  instructions: string | null;
+  is_active: boolean;
+  sort_order: number;
 };
 
 export type NotificationRow = {

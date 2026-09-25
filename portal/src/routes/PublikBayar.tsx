@@ -4,6 +4,8 @@ import { functionsUrl } from "../lib/supabaseClient";
 import { formatRupiah } from "../lib/format";
 import { QrisDisplay } from "../components/QrisDisplay";
 import { Countdown } from "../components/Countdown";
+import { PaymentAccountInfo } from "../components/PaymentAccountInfo";
+import type { PaymentAccount } from "../types/database";
 
 type LinkData = {
   payment_number: string;
@@ -12,7 +14,7 @@ type LinkData = {
   method: string;
   total_to_transfer: number;
   expires_at: string;
-  bank_info?: { bank_name: string | null; account_number: string | null; account_holder: string | null } | null;
+  account?: PaymentAccount | null;
   qris_payload?: string;
   redirect_url?: string;
 };
@@ -97,13 +99,9 @@ export default function PublikBayar() {
                   </div>
                 )}
 
-                {data.bank_info?.account_number && (
+                {data.method === "TRANSFER_MANUAL" && (
                   <div style={{ padding: 14, background: "var(--surface2)", borderRadius: 10 }}>
-                    <div style={{ fontSize: ".85rem", marginBottom: 4 }}>
-                      <strong>{data.bank_info.bank_name}</strong>
-                    </div>
-                    <div style={{ fontSize: ".95rem", fontWeight: 700, marginBottom: 4 }}>{data.bank_info.account_number}</div>
-                    <div style={{ fontSize: ".8rem", color: "var(--muted)" }}>a.n {data.bank_info.account_holder}</div>
+                    <PaymentAccountInfo account={data.account} />
                   </div>
                 )}
 

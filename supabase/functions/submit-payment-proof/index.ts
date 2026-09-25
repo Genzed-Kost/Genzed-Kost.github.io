@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
 
     const { data: payment } = await admin
       .from("payments")
-      .select("id, tenant_id, status, method, payment_number, amount, admin_fee")
+      .select("id, tenant_id, status, method, payment_number, amount, admin_fee, payment_account_id")
       .eq("id", payment_id)
       .maybeSingle();
     if (!payment || payment.tenant_id !== caller.user.id) {
@@ -46,6 +46,7 @@ Deno.serve(async (req) => {
       payment_id: payment.id,
       tenant_id: caller.user.id,
       file_path,
+      payment_account_id: payment.payment_account_id,
     });
 
     await admin.from("payments").update({ status: "MENUNGGU_VERIFIKASI" }).eq("id", payment.id);

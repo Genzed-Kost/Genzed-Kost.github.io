@@ -35,6 +35,7 @@ Deno.serve(async (req) => {
       use_deposit_amount,
       voucher_code,
       method,
+      payment_account_id,
       want_public_link,
       idempotency_key,
     }: {
@@ -44,6 +45,7 @@ Deno.serve(async (req) => {
       use_deposit_amount?: number;
       voucher_code?: string;
       method: Method;
+      payment_account_id?: string;
       want_public_link?: boolean;
       idempotency_key: string;
     } = body;
@@ -51,6 +53,9 @@ Deno.serve(async (req) => {
     if (!idempotency_key) return jsonResponse({ error: "idempotency_key wajib diisi." }, 400);
     if (!["TRANSFER_MANUAL", "QRIS_STATIS", "GATEWAY"].includes(method)) {
       return jsonResponse({ error: "Metode pembayaran tidak valid." }, 400);
+    }
+    if (method === "TRANSFER_MANUAL" && !payment_account_id) {
+      return jsonResponse({ error: "Pilih rekening tujuan transfer dulu." }, 400);
     }
 
     // Idempotency: kalau request ini pernah diproses, balikin hasil yang sama, jangan bikin baru.
@@ -66,8 +71,10 @@ Deno.serve(async (req) => {
         Number(existingPayment.amount) - Number(existingPayment.deposit_used) - Number(existingPayment.voucher_discount);
       const replayGross = replayExternal + Number(existingPayment.admin_fee) + Number(existingPayment.unique_code ?? 0);
       if (existingPayment.method === "TRANSFER_MANUAL") {
-        const { data: bankInfo } = await admin.from("settings").select("value").eq("key", "bank_transfer_info").maybeSingle();
-        replayExtra.bank_info = bankInfo?.value ?? null;
+        if (existingPayment.payment_account_id) {
+          const { data: acc } = await admin.from("payment_accounts").select("*").eq("id", existingPayment.payment_account_id).maybeSingle();
+          replayExtra.account = acc ?? null;
+        }
         replayExtra.total_to_transfer = replayGross;
       } else if (existingPayment.method === "QRIS_STATIS") {
         const merchantAccount = Deno.env.get("QRIS_MERCHANT_ACCOUNT");
@@ -184,6 +191,7 @@ Deno.serve(async (req) => {
     let adminFee = 0;
     let uniqueCode: number | null = null;
     let extra: Record<string, unknown> = {};
+    let resolvedAccountId: string | null = null;
 
     if (amountToPayExternally <= 0) {
       // Deposit + voucher udah nutup semua, nggak butuh transfer eksternal sama sekali.
@@ -194,8 +202,15 @@ Deno.serve(async (req) => {
       const grossToTransfer = amountToPayExternally + (borneBy === "tenant" ? adminFee : 0) + uniqueCode;
 
       if (method === "TRANSFER_MANUAL") {
-        const { data: bankInfo } = await admin.from("settings").select("value").eq("key", "bank_transfer_info").maybeSingle();
-        extra = { bank_info: bankInfo?.value ?? null, total_to_transfer: grossToTransfer };
+        const { data: account } = await admin
+          .from("payment_accounts")
+          .select("*")
+          .eq("id", payment_account_id)
+          .eq("is_active", true)
+          .maybeSingle();
+        if (!account) return jsonResponse({ error: "Rekening yang dipilih tidak ditemukan atau sudah nonaktif." }, 400);
+        resolvedAccountId = account.id;
+        extra = { account, total_to_transfer: grossToTransfer };
       } else {
         const merchantAccount = Deno.env.get("QRIS_MERCHANT_ACCOUNT");
         if (!merchantAccount) {
@@ -249,6 +264,7 @@ Deno.serve(async (req) => {
         voucher_discount: voucherDiscount,
         created_by: tenant.id,
         public_link_token: want_public_link ? crypto.randomUUID() : null,
+        payment_account_id: resolvedAccountId,
       })
       .select("*")
       .single();

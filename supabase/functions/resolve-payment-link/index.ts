@@ -17,7 +17,7 @@ Deno.serve(async (req) => {
     const { data: payment } = await admin
       .from("payments")
       .select(
-        "id, payment_number, method, status, amount, admin_fee, unique_code, deposit_used, voucher_discount, gateway_redirect_url, expires_at, tenant_id, profiles(full_name)"
+        "id, payment_number, method, status, amount, admin_fee, unique_code, deposit_used, voucher_discount, gateway_redirect_url, expires_at, tenant_id, payment_account_id, profiles(full_name)"
       )
       .eq("public_link_token", token)
       .maybeSingle();
@@ -41,8 +41,10 @@ Deno.serve(async (req) => {
 
     if (payment.status === "MENUNGGU") {
       if (payment.method === "TRANSFER_MANUAL") {
-        const { data: bankInfo } = await admin.from("settings").select("value").eq("key", "bank_transfer_info").maybeSingle();
-        result.bank_info = bankInfo?.value ?? null;
+        if (payment.payment_account_id) {
+          const { data: account } = await admin.from("payment_accounts").select("*").eq("id", payment.payment_account_id).maybeSingle();
+          result.account = account ?? null;
+        }
       } else if (payment.method === "QRIS_STATIS") {
         const merchantAccount = Deno.env.get("QRIS_MERCHANT_ACCOUNT");
         if (merchantAccount) {

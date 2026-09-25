@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import { Card } from "../../components/Card";
-
-type BankInfo = { bank_name: string | null; account_number: string | null; account_holder: string | null };
 
 export default function Pengaturan() {
   const [loaded, setLoaded] = useState(false);
@@ -10,7 +9,6 @@ export default function Pengaturan() {
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const [bankInfo, setBankInfo] = useState<BankInfo>({ bank_name: "", account_number: "", account_holder: "" });
   const [gatewayEnabled, setGatewayEnabled] = useState(false);
   const [adminFeeBorneBy, setAdminFeeBorneBy] = useState<"tenant" | "pemilik">("tenant");
   const [minPartialPayment, setMinPartialPayment] = useState("50000");
@@ -21,9 +19,8 @@ export default function Pengaturan() {
       const { data } = await supabase
         .from("settings")
         .select("key, value")
-        .in("key", ["bank_transfer_info", "payment_gateway_enabled", "admin_fee_borne_by", "min_partial_payment", "payment_method_fees"]);
+        .in("key", ["payment_gateway_enabled", "admin_fee_borne_by", "min_partial_payment", "payment_method_fees"]);
       const map = new Map((data ?? []).map((r) => [r.key, r.value]));
-      if (map.get("bank_transfer_info")) setBankInfo(map.get("bank_transfer_info") as BankInfo);
       setGatewayEnabled(map.get("payment_gateway_enabled") === true);
       setAdminFeeBorneBy((map.get("admin_fee_borne_by") as "tenant" | "pemilik") ?? "tenant");
       setMinPartialPayment(String(map.get("min_partial_payment") ?? 50000));
@@ -40,7 +37,6 @@ export default function Pengaturan() {
     setSaving(true);
     try {
       const updates = [
-        supabase.from("settings").update({ value: bankInfo }).eq("key", "bank_transfer_info"),
         supabase.from("settings").update({ value: gatewayEnabled }).eq("key", "payment_gateway_enabled"),
         supabase.from("settings").update({ value: adminFeeBorneBy }).eq("key", "admin_fee_borne_by"),
         supabase.from("settings").update({ value: Number(minPartialPayment) }).eq("key", "min_partial_payment"),
@@ -77,27 +73,13 @@ export default function Pengaturan() {
       {success && <div className="alert alert-success">Pengaturan berhasil disimpan.</div>}
 
       <Card style={{ marginBottom: 16 }}>
-        <h3 style={{ fontSize: ".95rem", marginBottom: 12 }}>Rekening Transfer Manual</h3>
-        <div className="field">
-          <label>Nama Bank</label>
-          <input value={bankInfo.bank_name ?? ""} onChange={(e) => setBankInfo({ ...bankInfo, bank_name: e.target.value })} placeholder="Bank Jago" />
-        </div>
-        <div className="field">
-          <label>Nomor Rekening</label>
-          <input
-            value={bankInfo.account_number ?? ""}
-            onChange={(e) => setBankInfo({ ...bankInfo, account_number: e.target.value })}
-            placeholder="1234567890"
-          />
-        </div>
-        <div className="field">
-          <label>Atas Nama</label>
-          <input
-            value={bankInfo.account_holder ?? ""}
-            onChange={(e) => setBankInfo({ ...bankInfo, account_holder: e.target.value })}
-            placeholder="Nama pemilik rekening"
-          />
-        </div>
+        <h3 style={{ fontSize: ".95rem", marginBottom: 8 }}>Rekening Transfer Manual</h3>
+        <p style={{ fontSize: ".85rem", color: "var(--muted)", marginBottom: 12 }}>
+          Sekarang bisa lebih dari satu rekening (bank, QRIS, e-wallet) — dikelola di halaman terpisah.
+        </p>
+        <Link to="/admin/rekening" className="btn-link">
+          Kelola Rekening →
+        </Link>
       </Card>
 
       <Card style={{ marginBottom: 16 }}>
