@@ -1,11 +1,19 @@
 import { useEffect, useState, type FormEvent } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
 import { formatTanggalWIB } from "../../lib/format";
 import { Card, EmptyState } from "../../components/Card";
 import type { Complaint } from "../../types/database";
 
-const KATEGORI = ["perbaikan", "kebersihan", "keamanan", "lainnya"] as const;
+const KATEGORI = ["perbaikan", "kebersihan", "keamanan", "data_diri", "lainnya"] as const;
+const KATEGORI_LABEL: Record<(typeof KATEGORI)[number], string> = {
+  perbaikan: "Perbaikan",
+  kebersihan: "Kebersihan",
+  keamanan: "Keamanan",
+  data_diri: "Ubah Data Diri",
+  lainnya: "Lainnya",
+};
 const STATUS_LABEL: Record<Complaint["status"], string> = {
   BARU: "Baru",
   DIPROSES: "Diproses",
@@ -21,9 +29,11 @@ const STATUS_COLOR: Record<Complaint["status"], string> = {
 
 export default function Komplain() {
   const { profile } = useAuth();
+  const location = useLocation();
+  const preset = location.state as { presetCategory?: (typeof KATEGORI)[number]; presetTitle?: string } | null;
   const [complaints, setComplaints] = useState<Complaint[] | null>(null);
-  const [category, setCategory] = useState<(typeof KATEGORI)[number]>("perbaikan");
-  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState<(typeof KATEGORI)[number]>(preset?.presetCategory ?? "perbaikan");
+  const [title, setTitle] = useState(preset?.presetTitle ?? "");
   const [description, setDescription] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -95,7 +105,7 @@ export default function Komplain() {
             >
               {KATEGORI.map((k) => (
                 <option key={k} value={k}>
-                  {k.charAt(0).toUpperCase() + k.slice(1)}
+                  {KATEGORI_LABEL[k]}
                 </option>
               ))}
             </select>
@@ -111,7 +121,7 @@ export default function Komplain() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={4}
-              placeholder="Jelasin detail masalahnya..."
+              placeholder={category === "data_diri" ? "Contoh: tolong ubah nama jadi ..., atau nomor HP baru: 0812xxxxxxxx" : "Jelasin detail masalahnya..."}
               style={{
                 background: "var(--surface2)",
                 border: "1px solid var(--border)",

@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import { supabase, functionsUrl } from "../../lib/supabaseClient";
 import { formatRupiah } from "../../lib/format";
 import { Card, EmptyState } from "../../components/Card";
+import { Modal } from "../../components/Modal";
 import type { TenancyWithTenant } from "../../types/database";
 
 type SimpleProfile = { id: string; full_name: string };
@@ -82,15 +83,7 @@ export default function Kontrak() {
     }
   }
 
-  async function handleEnd(tenancy: TenancyWithTenant) {
-    if (!confirm(`Akhiri kontrak ${tenancy.tenant.full_name} di kamar ${tenancy.room.room_number}?`)) return;
-    await supabase
-      .from("tenancies")
-      .update({ status: "BERAKHIR", end_date: new Date().toISOString().slice(0, 10) })
-      .eq("id", tenancy.id);
-    await supabase.from("rooms").update({ is_occupied: false }).eq("id", tenancy.room_id);
-    await load();
-  }
+  const [checkoutTarget, setCheckoutTarget] = useState<TenancyWithTenant | null>(null);
 
   return (
     <div className="container" style={{ paddingTop: 32, paddingBottom: 48 }}>
@@ -183,8 +176,8 @@ export default function Kontrak() {
                   {t.status}
                 </span>
                 {t.status === "AKTIF" && (
-                  <button className="btn-link" style={{ color: "var(--danger)" }} onClick={() => handleEnd(t)}>
-                    Akhiri
+                  <button className="btn-link" style={{ color: "var(--danger)" }} onClick={() => setCheckoutTarget(t)}>
+                    Akhiri Kontrak
                   </button>
                 )}
               </div>
@@ -192,7 +185,140 @@ export default function Kontrak() {
           ))}
         </div>
       )}
+
+      {checkoutTarget && (
+        <CheckoutModal
+          tenancy={checkoutTarget}
+          onClose={() => setCheckoutTarget(null)}
+          onDone={() => {
+            setCheckoutTarget(null);
+            load();
+          }}
+        />
+      )}
     </div>
+  );
+}
+
+function CheckoutModal({ tenancy, onClose, onDone }: { tenancy: TenancyWithTenant; onClose: () => void; onDone: () => void }) {
+  const [outstanding, setOutstanding] = useState<number | null>(null);
+  const [depositBalance, setDepositBalance] = useState<number | null>(null);
+  const [damageInput, setDamageInput] = useState("");
+  const [damageNote, setDamageNote] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<{ refund_amount: number; final_owed: number; applied_to_invoices: number } | null>(null);
+
+  useEffect(() => {
+    async function load() {
+      const [invRes, depRes] = await Promise.all([
+        supabase
+          .from("invoices")
+          .select("total, paid_total")
+          .eq("tenant_id", tenancy.tenant_id)
+          .in("status", ["TERBIT", "SEBAGIAN_DIBAYAR", "JATUH_TEMPO"]),
+        supabase.from("deposits").select("remaining_amount").eq("tenant_id", tenancy.tenant_id),
+      ]);
+      setOutstanding((invRes.data ?? []).reduce((sum, i) => sum + (Number(i.total) - Number(i.paid_total)), 0));
+      setDepositBalance((depRes.data ?? []).reduce((sum, d) => sum + Number(d.remaining_amount), 0));
+    }
+    load();
+  }, [tenancy.tenant_id]);
+
+  const damage = Math.max(0, Number(damageInput.replace(/\D/g, "")) || 0);
+  const net = (depositBalance ?? 0) - (outstanding ?? 0) - damage;
+
+  async function handleConfirm() {
+    setError(null);
+    setSubmitting(true);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const res = await fetch(functionsUrl("end-tenancy"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ tenancy_id: tenancy.id, damage_deduction: damage, damage_note: damageNote.trim() || undefined }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Gagal mengakhiri kontrak.");
+        return;
+      }
+      setResult(data);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Modal title={`Akhiri Kontrak — ${tenancy.tenant.full_name}`} onClose={onClose}>
+      {result ? (
+        <div>
+          <div className="alert alert-success" style={{ marginBottom: 16 }}>
+            Kontrak berhasil diakhiri. Kamar {tenancy.room.room_number} sudah tersedia lagi, akun penghuni dinonaktifkan.
+          </div>
+          {result.refund_amount > 0 && (
+            <p style={{ fontSize: ".9rem", marginBottom: 8 }}>
+              💰 Refund yang perlu dikembalikan ke penghuni: <strong>{formatRupiah(result.refund_amount)}</strong>
+            </p>
+          )}
+          {result.final_owed > 0 && (
+            <p style={{ fontSize: ".9rem", color: "var(--warn)", marginBottom: 8 }}>
+              ⚠️ Penghuni masih punya tunggakan: <strong>{formatRupiah(result.final_owed)}</strong>
+            </p>
+          )}
+          {result.refund_amount === 0 && result.final_owed === 0 && (
+            <p style={{ fontSize: ".9rem", marginBottom: 8 }}>Semua tagihan lunas, tidak ada sisa deposit maupun tunggakan.</p>
+          )}
+          <p style={{ fontSize: ".8rem", color: "var(--muted)" }}>Rincian juga sudah dikirim ke WhatsApp penghuni.</p>
+          <button className="btn btn-primary" style={{ width: "auto", marginTop: 12 }} onClick={onDone}>
+            Selesai
+          </button>
+        </div>
+      ) : outstanding === null || depositBalance === null ? (
+        <div className="spinner" style={{ borderTopColor: "var(--accent)", borderColor: "var(--border)" }} />
+      ) : (
+        <div>
+          {error && <div className="alert alert-error">{error}</div>}
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: ".85rem", marginBottom: 6 }}>
+            <span style={{ color: "var(--muted)" }}>Sisa Tagihan Belum Lunas</span>
+            <span>{formatRupiah(outstanding)}</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: ".85rem", marginBottom: 16 }}>
+            <span style={{ color: "var(--muted)" }}>Saldo Deposit</span>
+            <span>{formatRupiah(depositBalance)}</span>
+          </div>
+
+          <div className="field">
+            <label htmlFor="damage">Potongan Kerusakan (Rp, opsional)</label>
+            <input id="damage" inputMode="numeric" value={damageInput} onChange={(e) => setDamageInput(e.target.value.replace(/\D/g, ""))} placeholder="0" />
+          </div>
+          {damage > 0 && (
+            <div className="field">
+              <label htmlFor="damageNote">Keterangan Potongan</label>
+              <input id="damageNote" value={damageNote} onChange={(e) => setDamageNote(e.target.value)} placeholder="mis. Kaca jendela pecah" />
+            </div>
+          )}
+
+          <div style={{ padding: 14, background: "var(--surface2)", borderRadius: 10, marginBottom: 16 }}>
+            {net >= 0 ? (
+              <div style={{ fontSize: ".9rem" }}>
+                💰 Deposit dikembalikan ke penghuni: <strong>{formatRupiah(net)}</strong>
+              </div>
+            ) : (
+              <div style={{ fontSize: ".9rem", color: "var(--warn)" }}>
+                ⚠️ Deposit tidak cukup — penghuni masih punya tunggakan sekitar <strong>{formatRupiah(-net)}</strong>
+              </div>
+            )}
+          </div>
+
+          <button className="btn btn-primary" disabled={submitting} onClick={handleConfirm} style={{ width: "auto" }}>
+            {submitting ? <span className="spinner" /> : "Konfirmasi & Akhiri Kontrak"}
+          </button>
+        </div>
+      )}
+    </Modal>
   );
 }
 

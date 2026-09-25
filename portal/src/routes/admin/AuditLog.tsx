@@ -18,6 +18,8 @@ const ACTION_LABEL: Record<string, string> = {
   activate_payment_account: "Aktifkan rekening",
   deactivate_payment_account: "Nonaktifkan rekening",
   delete_payment_account: "Hapus rekening",
+  end_tenancy: "Akhiri kontrak (checkout)",
+  cancel_payment: "Batalkan pembayaran",
 };
 
 export default function AuditLog() {

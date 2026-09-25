@@ -4,12 +4,26 @@ import { formatRupiah, formatTanggalWIB } from "../../lib/format";
 import { Card, EmptyState } from "../../components/Card";
 import type { PaymentForReview } from "../../types/database";
 
+type VerifiedPayment = {
+  id: string;
+  payment_number: string;
+  method: string;
+  amount: number;
+  paid_at: string | null;
+  tenant: { full_name: string; phone: string } | null;
+};
+
 export default function VerifikasiPembayaran() {
   const [payments, setPayments] = useState<PaymentForReview[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [proofUrls, setProofUrls] = useState<Record<string, string>>({});
   const [rejectReason, setRejectReason] = useState<Record<string, string>>({});
+
+  const [verified, setVerified] = useState<VerifiedPayment[] | null>(null);
+  const [cancelReason, setCancelReason] = useState<Record<string, string>>({});
+  const [cancelingId, setCancelingId] = useState<string | null>(null);
+  const [showCancelFor, setShowCancelFor] = useState<string | null>(null);
 
   async function load() {
     const { data, error: fetchErr } = await supabase
@@ -38,9 +52,50 @@ export default function VerifikasiPembayaran() {
     setProofUrls(urls);
   }
 
+  async function loadVerified() {
+    const { data } = await supabase
+      .from("payments")
+      .select("id, payment_number, method, amount, paid_at, tenant:profiles!payments_tenant_id_fkey(full_name, phone)")
+      .eq("status", "LUNAS")
+      .order("paid_at", { ascending: false })
+      .limit(20);
+    setVerified((data ?? []) as unknown as VerifiedPayment[]);
+  }
+
   useEffect(() => {
     load();
+    loadVerified();
   }, []);
+
+  async function handleCancel(paymentId: string) {
+    setError(null);
+    const reason = cancelReason[paymentId]?.trim();
+    if (!reason) {
+      setError("Isi alasan pembatalan dulu ya.");
+      return;
+    }
+    if (!confirm("Yakin batalkan pembayaran ini? Tagihan terkait akan disesuaikan kembali.")) return;
+    setCancelingId(paymentId);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const res = await fetch(functionsUrl("cancel-payment"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ payment_id: paymentId, reason }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? "Gagal membatalkan pembayaran.");
+        return;
+      }
+      setShowCancelFor(null);
+      await loadVerified();
+    } finally {
+      setCancelingId(null);
+    }
+  }
 
   async function handleDecision(paymentId: string, decision: "APPROVE" | "REJECT") {
     setError(null);
@@ -160,6 +215,50 @@ export default function VerifikasiPembayaran() {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      <h2 style={{ fontSize: "1.1rem", marginTop: 40, marginBottom: 4 }}>Pembayaran Terverifikasi</h2>
+      <p style={{ color: "var(--muted)", fontSize: ".85rem", marginBottom: 16 }}>
+        20 pembayaran LUNAS terbaru. Salah verifikasi? Batalkan di sini — tagihan terkait otomatis disesuaikan.
+      </p>
+
+      {verified === null ? (
+        <div className="spinner" style={{ borderTopColor: "var(--accent)", borderColor: "var(--border)" }} />
+      ) : verified.length === 0 ? (
+        <Card>
+          <EmptyState icon="📭" text="Belum ada pembayaran terverifikasi." />
+        </Card>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {verified.map((p) => (
+            <Card key={p.id} style={{ padding: 14 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: ".85rem" }}>{p.payment_number}</div>
+                  <div style={{ fontSize: ".76rem", color: "var(--muted)" }}>
+                    {p.tenant?.full_name} · {formatRupiah(p.amount)} · {p.paid_at ? formatTanggalWIB(p.paid_at) : "-"}
+                  </div>
+                </div>
+                <button className="btn-link" style={{ color: "var(--danger)" }} onClick={() => setShowCancelFor(showCancelFor === p.id ? null : p.id)}>
+                  Batalkan
+                </button>
+              </div>
+              {showCancelFor === p.id && (
+                <div style={{ marginTop: 10, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <input
+                    placeholder="Alasan pembatalan (wajib)"
+                    value={cancelReason[p.id] ?? ""}
+                    onChange={(e) => setCancelReason((prev) => ({ ...prev, [p.id]: e.target.value }))}
+                    style={{ flex: 1, minWidth: 180 }}
+                  />
+                  <button className="btn btn-primary" style={{ width: "auto" }} disabled={cancelingId === p.id} onClick={() => handleCancel(p.id)}>
+                    {cancelingId === p.id ? <span className="spinner" /> : "Konfirmasi Batalkan"}
+                  </button>
+                </div>
+              )}
+            </Card>
+          ))}
         </div>
       )}
     </div>

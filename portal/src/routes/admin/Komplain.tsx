@@ -15,6 +15,13 @@ type ComplaintRow = {
 };
 
 const STATUS_OPTIONS = ["BARU", "DIPROSES", "SELESAI", "DITOLAK"] as const;
+const CATEGORY_LABEL: Record<string, string> = {
+  perbaikan: "Perbaikan",
+  kebersihan: "Kebersihan",
+  keamanan: "Keamanan",
+  data_diri: "Ubah Data Diri",
+  lainnya: "Lainnya",
+};
 
 export default function AdminKomplain() {
   const [complaints, setComplaints] = useState<ComplaintRow[] | null>(null);
@@ -80,7 +87,7 @@ export default function AdminKomplain() {
                 <div>
                   <div style={{ fontWeight: 700, fontSize: ".9rem" }}>{c.title}</div>
                   <div style={{ fontSize: ".78rem", color: "var(--muted)" }}>
-                    {c.tenant?.full_name} · {c.category} · {formatTanggalWIB(c.created_at)}
+                    {c.tenant?.full_name} · {CATEGORY_LABEL[c.category] ?? c.category} · {formatTanggalWIB(c.created_at)}
                   </div>
                 </div>
               </div>

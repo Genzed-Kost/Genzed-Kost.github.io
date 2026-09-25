@@ -76,7 +76,11 @@ export async function confirmPayment(admin: SupabaseClient, paymentId: string): 
   }
 
   if (Number(payment.deposit_used) > 0) {
-    await deductDeposit(admin, payment.tenant_id, Number(payment.deposit_used), payment.id);
+    await deductDeposit(admin, payment.tenant_id, Number(payment.deposit_used), {
+      referenceType: "payment",
+      referenceId: payment.id,
+      description: "Saldo deposit dipakai untuk membayar tagihan",
+    });
   }
 
   if (payment.voucher_id && Number(payment.voucher_discount) > 0) {
@@ -111,8 +115,14 @@ export async function confirmPayment(admin: SupabaseClient, paymentId: string): 
   return { processed: true };
 }
 
-// Kurangi saldo deposit tenant secara FIFO (deposit terlama dipakai duluan) sejumlah `amount`.
-async function deductDeposit(admin: SupabaseClient, tenantId: string, amount: number, paymentId: string) {
+// Kurangi saldo deposit tenant secara FIFO (deposit terlama dipakai duluan) sejumlah `amount`,
+// lalu catat ledger entry-nya. Diekspor juga buat dipakai end-tenancy (checkout & refund deposit).
+export async function deductDeposit(
+  admin: SupabaseClient,
+  tenantId: string,
+  amount: number,
+  opts: { referenceType: string; referenceId: string | null; description: string; entryType?: "DEPOSIT_KELUAR" | "REFUND" | "PENYESUAIAN" }
+) {
   let remaining = amount;
   const { data: deposits } = await admin
     .from("deposits")
@@ -134,16 +144,16 @@ async function deductDeposit(admin: SupabaseClient, tenantId: string, amount: nu
   const balanceAfter = await getDepositBalance(admin, tenantId);
   await admin.from("ledger_entries").insert({
     tenant_id: tenantId,
-    entry_type: "DEPOSIT_KELUAR",
+    entry_type: opts.entryType ?? "DEPOSIT_KELUAR",
     amount: -amount,
     balance_after: balanceAfter,
-    reference_type: "payment",
-    reference_id: paymentId,
-    description: "Saldo deposit dipakai untuk membayar tagihan",
+    reference_type: opts.referenceType,
+    reference_id: opts.referenceId,
+    description: opts.description,
   });
 }
 
-async function getDepositBalance(admin: SupabaseClient, tenantId: string): Promise<number> {
+export async function getDepositBalance(admin: SupabaseClient, tenantId: string): Promise<number> {
   const { data } = await admin.from("deposits").select("remaining_amount").eq("tenant_id", tenantId);
   return (data ?? []).reduce((sum, d) => sum + Number(d.remaining_amount), 0);
 }
