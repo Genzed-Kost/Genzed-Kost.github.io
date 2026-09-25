@@ -14,14 +14,15 @@ Deno.serve(async (req) => {
     if (!token) return jsonResponse({ error: "Token tidak valid." }, 400);
 
     const admin = getSupabaseAdmin();
-    const { data: payment } = await admin
+    const { data: payment, error: paymentErr } = await admin
       .from("payments")
       .select(
-        "id, payment_number, method, status, amount, admin_fee, unique_code, deposit_used, voucher_discount, gateway_redirect_url, expires_at, tenant_id, payment_account_id, profiles(full_name)"
+        "id, payment_number, method, status, amount, admin_fee, unique_code, deposit_used, voucher_discount, gateway_redirect_url, expires_at, tenant_id, payment_account_id, profiles!payments_tenant_id_fkey(full_name)"
       )
       .eq("public_link_token", token)
       .maybeSingle();
 
+    if (paymentErr) return jsonResponse({ error: paymentErr.message }, 500);
     if (!payment) return jsonResponse({ error: "Link pembayaran tidak ditemukan atau sudah tidak berlaku." }, 404);
 
     const tenant = payment.profiles as unknown as { full_name: string } | null;
