@@ -15,7 +15,7 @@ export default function VerifikasiPembayaran() {
     const { data, error: fetchErr } = await supabase
       .from("payments")
       .select(
-        "id, payment_number, method, amount, admin_fee, unique_code, deposit_used, voucher_discount, status, created_at, tenant:profiles!payments_tenant_id_fkey(full_name, phone), payment_proofs(id, file_path, uploaded_at, payment_account:payment_accounts(account_type, bank_name, account_number, ewallet_provider))"
+        "id, payment_number, method, amount, admin_fee, unique_code, deposit_used, voucher_discount, status, created_at, tenant:profiles!payments_tenant_id_fkey(full_name, phone), payment_proofs(id, file_path, uploaded_at, payment_account:payment_accounts(account_type, bank_name, account_number, ewallet_provider, crypto_asset, crypto_network))"
       )
       .eq("status", "MENUNGGU_VERIFIKASI")
       .order("created_at", { ascending: true });
@@ -106,7 +106,14 @@ export default function VerifikasiPembayaran() {
                     {(() => {
                       const acc = p.payment_proofs[p.payment_proofs.length - 1]?.payment_account;
                       if (!acc) return null;
-                      const label = acc.account_type === "EWALLET" ? acc.ewallet_provider : acc.account_type === "QRIS" ? "QRIS" : acc.bank_name;
+                      const label =
+                        acc.account_type === "EWALLET"
+                          ? acc.ewallet_provider
+                          : acc.account_type === "QRIS"
+                            ? "QRIS"
+                            : acc.account_type === "CRYPTO"
+                              ? `${acc.crypto_asset} (${acc.crypto_network})`
+                              : acc.bank_name;
                       return (
                         <div style={{ fontSize: ".78rem", color: "var(--muted)" }}>
                           Transfer ke: {label} {acc.account_number ? `· ${acc.account_number}` : ""}

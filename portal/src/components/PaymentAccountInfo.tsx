@@ -1,4 +1,5 @@
 import { supabase } from "../lib/supabaseClient";
+import { QrisDisplay } from "./QrisDisplay";
 import type { PaymentAccount } from "../types/database";
 
 export function PaymentAccountInfo({ account }: { account: PaymentAccount | null | undefined }) {
@@ -14,6 +15,28 @@ export function PaymentAccountInfo({ account }: { account: PaymentAccount | null
       <div style={{ textAlign: "center" }}>
         {url && <img src={url} alt="QRIS" style={{ width: 180, height: 180, objectFit: "contain", margin: "0 auto", borderRadius: 10, border: "1px solid var(--border)" }} />}
         {account.instructions && <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: 8 }}>{account.instructions}</p>}
+      </div>
+    );
+  }
+
+  if (account.account_type === "CRYPTO") {
+    return (
+      <div style={{ textAlign: "center" }}>
+        {account.account_number && (
+          <div style={{ display: "inline-block" }}>
+            <QrisDisplay payload={account.account_number} />
+          </div>
+        )}
+        <div style={{ fontSize: ".85rem", marginTop: 10 }}>
+          <strong>
+            {account.crypto_asset} · {account.crypto_network}
+          </strong>
+        </div>
+        <div style={{ fontSize: ".8rem", fontFamily: "monospace", wordBreak: "break-all", marginTop: 4 }}>{account.account_number}</div>
+        <p style={{ fontSize: ".76rem", color: "var(--warn)", marginTop: 8 }}>
+          ⚠️ Kirim cuma pakai jaringan <strong>{account.crypto_network}</strong> — salah jaringan bikin dana hilang.
+        </p>
+        {account.instructions && <p style={{ fontSize: ".8rem", color: "var(--muted)", marginTop: 6 }}>{account.instructions}</p>}
       </div>
     );
   }

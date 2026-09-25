@@ -420,8 +420,14 @@ export default function Bayar() {
                     <label key={a.id} style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
                       <input type="radio" name="paymentAccount" checked={selectedAccountId === a.id} onChange={() => setSelectedAccountId(a.id)} />
                       <span style={{ fontSize: ".82rem" }}>
-                        {a.account_type === "QRIS" ? "QRIS" : a.account_type === "EWALLET" ? a.ewallet_provider : a.bank_name}
-                        {a.account_number ? ` · ${a.account_number}` : ""}
+                        {a.account_type === "QRIS"
+                          ? "QRIS"
+                          : a.account_type === "EWALLET"
+                            ? a.ewallet_provider
+                            : a.account_type === "CRYPTO"
+                              ? `${a.crypto_asset} (${a.crypto_network})`
+                              : a.bank_name}
+                        {a.account_type !== "CRYPTO" && a.account_number ? ` · ${a.account_number}` : ""}
                       </span>
                     </label>
                   ))

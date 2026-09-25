@@ -72,9 +72,8 @@ export default function Denda() {
   }
 
   return (
-    <div className="container" style={{ paddingTop: 32, paddingBottom: 48 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, flexWrap: "wrap", gap: 10 }}>
-        <h1 style={{ fontSize: "1.5rem" }}>Aturan Denda Keterlambatan</h1>
+    <div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 4 }}>
         <button className="btn btn-primary" style={{ width: "auto" }} onClick={() => setShowForm((v) => !v)}>
           {showForm ? "Batal" : "+ Aturan Baru"}
         </button>

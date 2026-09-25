@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { supabase } from "../../lib/supabaseClient";
 import { Card } from "../../components/Card";
+import { Modal } from "../../components/Modal";
+import Rekening from "./Rekening";
+import Denda from "./Denda";
 
 export default function Pengaturan() {
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [openModal, setOpenModal] = useState<"rekening" | "denda" | null>(null);
 
   const [gatewayEnabled, setGatewayEnabled] = useState(false);
   const [adminFeeBorneBy, setAdminFeeBorneBy] = useState<"tenant" | "pemilik">("tenant");
@@ -75,11 +78,19 @@ export default function Pengaturan() {
       <Card style={{ marginBottom: 16 }}>
         <h3 style={{ fontSize: ".95rem", marginBottom: 8 }}>Rekening Transfer Manual</h3>
         <p style={{ fontSize: ".85rem", color: "var(--muted)", marginBottom: 12 }}>
-          Sekarang bisa lebih dari satu rekening (bank, QRIS, e-wallet) — dikelola di halaman terpisah.
+          Bisa lebih dari satu rekening (bank, QRIS, e-wallet, kripto).
         </p>
-        <Link to="/admin/rekening" className="btn-link">
+        <button type="button" className="btn-link" onClick={() => setOpenModal("rekening")}>
           Kelola Rekening →
-        </Link>
+        </button>
+      </Card>
+
+      <Card style={{ marginBottom: 16 }}>
+        <h3 style={{ fontSize: ".95rem", marginBottom: 8 }}>Aturan Denda Keterlambatan</h3>
+        <p style={{ fontSize: ".85rem", color: "var(--muted)", marginBottom: 12 }}>Dipakai mesin denda otomatis tiap hari.</p>
+        <button type="button" className="btn-link" onClick={() => setOpenModal("denda")}>
+          Kelola Aturan Denda →
+        </button>
       </Card>
 
       <Card style={{ marginBottom: 16 }}>
@@ -123,6 +134,17 @@ export default function Pengaturan() {
       <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ width: "auto" }}>
         {saving ? <span className="spinner" /> : "Simpan Pengaturan"}
       </button>
+
+      {openModal === "rekening" && (
+        <Modal title="Rekening Transfer Manual" onClose={() => setOpenModal(null)}>
+          <Rekening />
+        </Modal>
+      )}
+      {openModal === "denda" && (
+        <Modal title="Aturan Denda Keterlambatan" onClose={() => setOpenModal(null)}>
+          <Denda />
+        </Modal>
+      )}
     </div>
   );
 }

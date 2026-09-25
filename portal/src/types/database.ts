@@ -110,7 +110,14 @@ export type PaymentProof = {
   id: string;
   file_path: string;
   uploaded_at: string;
-  payment_account: { account_type: PaymentAccountType; bank_name: string | null; account_number: string | null; ewallet_provider: string | null } | null;
+  payment_account: {
+    account_type: PaymentAccountType;
+    bank_name: string | null;
+    account_number: string | null;
+    ewallet_provider: string | null;
+    crypto_asset: string | null;
+    crypto_network: string | null;
+  } | null;
 };
 
 export type PaymentForReview = {
@@ -148,7 +155,7 @@ export type Complaint = {
   created_at: string;
 };
 
-export type PaymentAccountType = "BANK" | "QRIS" | "EWALLET";
+export type PaymentAccountType = "BANK" | "QRIS" | "EWALLET" | "CRYPTO";
 
 export type PaymentAccount = {
   id: string;
@@ -159,6 +166,8 @@ export type PaymentAccount = {
   account_holder: string | null;
   qris_image_path: string | null;
   ewallet_provider: string | null;
+  crypto_asset: string | null;
+  crypto_network: string | null;
   instructions: string | null;
   is_active: boolean;
   sort_order: number;

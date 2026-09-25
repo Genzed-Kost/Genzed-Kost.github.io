@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { supabase } from "../../lib/supabaseClient";
 import { BANKS, EWALLET_PROVIDERS } from "../../lib/banks";
+import { CRYPTO_ASSETS, CRYPTO_NETWORKS } from "../../lib/crypto";
 import { Card, EmptyState } from "../../components/Card";
 import type { PaymentAccount, PaymentAccountType } from "../../types/database";
 
@@ -10,6 +11,7 @@ const TYPE_ICON: Record<PaymentAccountType, string> = {
   BANK: "🏦",
   QRIS: "📱",
   EWALLET: "💳",
+  CRYPTO: "🪙",
 };
 
 export default function Rekening() {
@@ -23,6 +25,8 @@ export default function Rekening() {
   const [bankCode, setBankCode] = useState(BANKS[0].code);
   const [bankNameOther, setBankNameOther] = useState("");
   const [ewalletProvider, setEwalletProvider] = useState<string>(EWALLET_PROVIDERS[0]);
+  const [cryptoAsset, setCryptoAsset] = useState<string>(CRYPTO_ASSETS[0]);
+  const [cryptoNetwork, setCryptoNetwork] = useState<string>(CRYPTO_NETWORKS[0]);
   const [accountNumber, setAccountNumber] = useState("");
   const [accountHolder, setAccountHolder] = useState("");
   const [instructions, setInstructions] = useState("");
@@ -48,6 +52,8 @@ export default function Rekening() {
     setBankCode(BANKS[0].code);
     setBankNameOther("");
     setEwalletProvider(EWALLET_PROVIDERS[0]);
+    setCryptoAsset(CRYPTO_ASSETS[0]);
+    setCryptoNetwork(CRYPTO_NETWORKS[0]);
     setAccountNumber("");
     setAccountHolder("");
     setInstructions("");
@@ -64,6 +70,10 @@ export default function Rekening() {
       setBankNameOther(known ? "" : a.bank_name ?? "");
     }
     if (a.account_type === "EWALLET") setEwalletProvider(a.ewallet_provider ?? EWALLET_PROVIDERS[0]);
+    if (a.account_type === "CRYPTO") {
+      setCryptoAsset(a.crypto_asset ?? CRYPTO_ASSETS[0]);
+      setCryptoNetwork(a.crypto_network ?? CRYPTO_NETWORKS[0]);
+    }
     setAccountNumber(a.account_number ?? "");
     setAccountHolder(a.account_holder ?? "");
     setInstructions(a.instructions ?? "");
@@ -98,7 +108,7 @@ export default function Rekening() {
       return;
     }
     if (accountType !== "QRIS" && !accountNumber.trim()) {
-      setError("Nomor rekening / nomor e-wallet wajib diisi.");
+      setError(accountType === "CRYPTO" ? "Alamat wallet wajib diisi." : "Nomor rekening / nomor e-wallet wajib diisi.");
       return;
     }
 
@@ -121,8 +131,10 @@ export default function Rekening() {
         bank_code: accountType === "BANK" ? bankCode : null,
         bank_name: accountType === "BANK" ? (bankCode === "OTHER" ? bankNameOther.trim() : bankRef?.name ?? null) : null,
         account_number: accountType === "QRIS" ? null : accountNumber.trim(),
-        account_holder: accountType === "QRIS" ? null : accountHolder.trim() || null,
+        account_holder: accountType === "QRIS" || accountType === "CRYPTO" ? null : accountHolder.trim() || null,
         ewallet_provider: accountType === "EWALLET" ? ewalletProvider : null,
+        crypto_asset: accountType === "CRYPTO" ? cryptoAsset : null,
+        crypto_network: accountType === "CRYPTO" ? cryptoNetwork : null,
         qris_image_path: accountType === "QRIS" ? finalQrisPath : null,
         instructions: instructions.trim() || null,
       };
@@ -175,7 +187,7 @@ export default function Rekening() {
   }
 
   async function handleDelete(a: PaymentAccount) {
-    if (!confirm(`Hapus rekening "${a.bank_name ?? a.ewallet_provider ?? "QRIS"}"?`)) return;
+    if (!confirm(`Hapus rekening "${a.bank_name ?? a.ewallet_provider ?? a.crypto_asset ?? "QRIS"}"?`)) return;
     const { error: deleteErr } = await supabase.from("payment_accounts").delete().eq("id", a.id);
     if (deleteErr) {
       setError("Gagal menghapus rekening.");
@@ -188,9 +200,8 @@ export default function Rekening() {
   const activeCount = (accounts ?? []).filter((a) => a.is_active).length;
 
   return (
-    <div className="container" style={{ paddingTop: 32, paddingBottom: 48 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4, flexWrap: "wrap", gap: 10 }}>
-        <h1 style={{ fontSize: "1.5rem" }}>Rekening Transfer Manual</h1>
+    <div>
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 4 }}>
         <button
           className="btn btn-primary"
           style={{ width: "auto" }}
@@ -225,6 +236,7 @@ export default function Rekening() {
                 <option value="BANK">Bank</option>
                 <option value="QRIS">QRIS (gambar statis)</option>
                 <option value="EWALLET">E-Wallet</option>
+                <option value="CRYPTO">Kripto (BTC/USDT/dst)</option>
               </select>
             </div>
 
@@ -290,6 +302,48 @@ export default function Rekening() {
               </>
             )}
 
+            {accountType === "CRYPTO" && (
+              <>
+                <div className="field">
+                  <label htmlFor="cryptoAsset">Aset</label>
+                  <select
+                    id="cryptoAsset"
+                    value={cryptoAsset}
+                    onChange={(e) => setCryptoAsset(e.target.value)}
+                    style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: "var(--r)", padding: "12px 14px", color: "var(--text)", width: "100%" }}
+                  >
+                    {CRYPTO_ASSETS.map((a) => (
+                      <option key={a} value={a}>
+                        {a}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label htmlFor="cryptoNetwork">Jaringan (Network)</label>
+                  <select
+                    id="cryptoNetwork"
+                    value={cryptoNetwork}
+                    onChange={(e) => setCryptoNetwork(e.target.value)}
+                    style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: "var(--r)", padding: "12px 14px", color: "var(--text)", width: "100%" }}
+                  >
+                    {CRYPTO_NETWORKS.map((n) => (
+                      <option key={n} value={n}>
+                        {n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label htmlFor="walletAddress">Alamat Wallet</label>
+                  <input id="walletAddress" value={accountNumber} onChange={(e) => setAccountNumber(e.target.value.trim())} placeholder="mis. 0x4d1e2d38..." style={{ fontFamily: "monospace", fontSize: ".82rem" }} />
+                </div>
+                <p style={{ fontSize: ".78rem", color: "var(--warn)", marginTop: -10, marginBottom: 16 }}>
+                  ⚠️ Pastikan aset & jaringan di atas SAMA PERSIS dengan alamat ini. Salah jaringan bisa bikin dana hilang.
+                </p>
+              </>
+            )}
+
             {accountType === "QRIS" && (
               <div className="field">
                 <label>Gambar QRIS</label>
@@ -336,9 +390,9 @@ export default function Rekening() {
                 )}
                 <div>
                   <div style={{ fontWeight: 700, fontSize: ".9rem" }}>
-                    {TYPE_ICON[a.account_type]} {a.bank_name ?? a.ewallet_provider ?? "QRIS"}
+                    {TYPE_ICON[a.account_type]} {a.bank_name ?? a.ewallet_provider ?? (a.account_type === "CRYPTO" ? `${a.crypto_asset} · ${a.crypto_network}` : "QRIS")}
                   </div>
-                  <div style={{ fontSize: ".78rem", color: "var(--muted)" }}>
+                  <div style={{ fontSize: ".78rem", color: "var(--muted)", wordBreak: "break-all" }}>
                     {a.account_number ?? "—"} {a.account_holder ? `· a.n ${a.account_holder}` : ""}
                   </div>
                   {a.instructions && <div style={{ fontSize: ".76rem", color: "var(--muted)", marginTop: 2 }}>{a.instructions}</div>}
