@@ -7,10 +7,10 @@ Website Genzed Kost (Serang, Banten) terdiri dari dua bagian:
 
 Status pembangunan:
 - ✅ **Modul 1 — Autentikasi** (login, aktivasi akun via undangan WhatsApp, lupa password)
-- ✅ **Modul 2 — Dashboard Penghuni** (info kamar, ringkasan tagihan/deposit/voucher, pengingat jatuh tempo H-7/H-3/H-1/H-0, komplain, profil, dokumen)
+- ✅ **Modul 2 — Dashboard Penghuni** (info kamar, ringkasan tagihan/deposit/voucher, pengingat jatuh tempo H-7/H-3/H-1/H-0, komplain, profil read-only — ubah data lewat komplain kategori "Ubah Data Diri", dokumen)
 - ✅ **Modul 3 — Tagihan** (generate tagihan bulanan otomatis dengan prorata, denda keterlambatan otomatis, halaman rincian tagihan)
 - ✅ **Modul 4 — Pembayaran** (manual multi-rekening — bank/QRIS statis/e-wallet, sekaligus otomatis via Midtrans, kombinasi deposit+voucher, link bayar tanpa login, invoice PDF otomatis)
-- ✅ **Modul 5 — Panel Admin** (`/admin`) — verifikasi transfer manual, kelola rekening pembayaran, kamar/tipe kamar/penghuni/kontrak/voucher/denda/pengaturan pembayaran, laporan (pemasukan, tunggakan, hunian, ekspor CSV), audit log, balas komplain
+- ✅ **Modul 5 — Panel Admin** (`/admin`) — verifikasi transfer manual (+ batalkan pembayaran yang salah verifikasi, efeknya otomatis dibalik lewat ledger), kelola rekening pembayaran, kamar/tipe kamar/penghuni/kontrak (+ akhiri kontrak/checkout dengan hitung refund deposit otomatis), voucher/denda/pengaturan pembayaran, laporan (pemasukan, tunggakan, hunian, ekspor CSV), audit log, balas komplain
 
 **Semua 5 modul dari brief awal sudah selesai dibangun.** Yang masih jadi keterbatasan (lihat "Catatan Keterbatasan" di paling bawah): split payment kamar berdua belum ada (butuh keputusan desain tambahan), dan seluruh sistem belum pernah dites jalan nyata karena komputer ini tidak ada Node.js/Deno terinstall.
 
@@ -80,12 +80,14 @@ Status pembangunan:
    supabase functions deploy expire-stale-payments
    supabase functions deploy resolve-payment-link
    supabase functions deploy review-payment
+   supabase functions deploy end-tenancy
+   supabase functions deploy cancel-payment
    ```
    Lalu tambahkan secret Vault buat jadwal cek transaksi kedaluwarsa (pakai `reminder_cron_secret` yang sama):
    ```sql
    select vault.create_secret('https://<project-ref>.supabase.co/functions/v1/expire-stale-payments', 'expire_payments_function_url');
    ```
-9. Setup pembayaran **manual** (selalu aktif, gratis) — bisa lebih dari satu rekening (bank, QRIS gambar statis, e-wallet). Kelola lewat halaman **Admin → Rekening** (`/admin/rekening`) di portal setelah akun admin dibuat (langkah 12): tambah, ubah, aktif/nonaktifkan, urutkan, hapus. Minimal 1 rekening harus aktif sebelum penghuni bisa pakai jalur transfer manual. Migrasi [`20250112000000_payment_accounts.sql`](supabase/migrations/20250112000000_payment_accounts.sql) otomatis mindahin rekening lama (kalau sudah pernah diisi lewat setting `bank_transfer_info`) jadi baris pertama.
+9. Setup pembayaran **manual** (selalu aktif, gratis) — bisa lebih dari satu rekening (bank, QRIS gambar statis, e-wallet, kripto). Kelola lewat popup **Admin → Pengaturan → Kelola Rekening** di portal setelah akun admin dibuat (langkah 12): tambah, ubah, aktif/nonaktifkan, urutkan, hapus. Minimal 1 rekening harus aktif sebelum penghuni bisa pakai jalur transfer manual. Migrasi [`20250112000000_payment_accounts.sql`](supabase/migrations/20250112000000_payment_accounts.sql) otomatis mindahin rekening lama (kalau sudah pernah diisi lewat setting `bank_transfer_info`) jadi baris pertama.
    - (Opsional) Kalau mau QRIS **dinamis** yang otomatis nampilin nominal + kode unik (beda dari QRIS gambar statis di atas — ini generate ulang tiap transaksi), set nomor akun QRIS sebagai secret (JANGAN taruh di kode/migrasi):
      ```bash
      supabase secrets set QRIS_MERCHANT_ACCOUNT=nomor_akun_qris_kost
