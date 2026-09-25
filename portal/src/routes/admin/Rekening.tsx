@@ -6,10 +6,10 @@ import type { PaymentAccount, PaymentAccountType } from "../../types/database";
 
 const BUCKET = "payment-account-qris";
 
-const TYPE_LABEL: Record<PaymentAccountType, string> = {
-  BANK: "🏦 Bank",
-  QRIS: "📱 QRIS",
-  EWALLET: "💳 E-Wallet",
+const TYPE_ICON: Record<PaymentAccountType, string> = {
+  BANK: "🏦",
+  QRIS: "📱",
+  EWALLET: "💳",
 };
 
 export default function Rekening() {
@@ -207,7 +207,7 @@ export default function Rekening() {
       </p>
 
       {error && <div className="alert alert-error">{error}</div>}
-      {activeCount === 0 && !error && (
+      {accounts !== null && activeCount === 0 && !error && (
         <div className="alert alert-error">⚠️ Belum ada rekening aktif — penghuni tidak bisa pakai transfer manual sampai ada minimal 1.</div>
       )}
 
@@ -336,7 +336,7 @@ export default function Rekening() {
                 )}
                 <div>
                   <div style={{ fontWeight: 700, fontSize: ".9rem" }}>
-                    {TYPE_LABEL[a.account_type]} {a.bank_name ?? a.ewallet_provider ?? ""}
+                    {TYPE_ICON[a.account_type]} {a.bank_name ?? a.ewallet_provider ?? "QRIS"}
                   </div>
                   <div style={{ fontSize: ".78rem", color: "var(--muted)" }}>
                     {a.account_number ?? "—"} {a.account_holder ? `· a.n ${a.account_holder}` : ""}
